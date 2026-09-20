@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Teoria em Voz Alta: leitura acadêmica, preparação e prática oral para Teoria Linguística 1.">
+  <meta name="theme-color" content="#172e3b">
+  <title>Teoria em Voz Alta | Teoria Linguística 1</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%23172e3b'/%3E%3Cg fill='none' stroke='%23f2c14e' stroke-width='4' stroke-linecap='round'%3E%3Cpath d='M15 45c9-8 20-10 34-10'/%3E%3Cpath d='M15 34c10-8 21-10 34-10'/%3E%3Cpath d='M15 23c10-6 21-8 34-8'/%3E%3C/g%3E%3Ccircle cx='15' cy='45' r='4' fill='%23d65339'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./assets/css/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+  <header class="site-header">
+    <a class="brand" href="#inicio" aria-label="Teoria em Voz Alta — início">
+      <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 64 64"><rect x="3" y="3" width="58" height="58" rx="18"/><g class="brand-waves"><path d="M15 45c9-8 20-10 34-10"/><path d="M15 34c10-8 21-10 34-10"/><path d="M15 23c10-6 21-8 34-8"/></g><circle cx="15" cy="45" r="4"/></svg></span>
+      <span class="brand-name"><strong>Teoria em Voz Alta</strong><small>Teoria Linguística 1</small></span>
+    </a>
+    <button class="menu-button" type="button" aria-expanded="false" aria-controls="nav">Menu</button>
+    <nav id="nav" aria-label="Navegação principal">
+      <a href="#praticar">Praticar</a>
+      <a href="#como-usar">Como usar</a>
+      <a href="#explorar">Explorar</a>
+      <a href="#glossario">Glossário</a>
+      <a href="#estudo">Meu estudo</a>
+      <a href="#sobre">Sobre</a>
+    </nav>
+  </header>
+
+  <main id="conteudo">
+    <section id="inicio" class="view active" aria-labelledby="inicio-titulo">
+      <div class="home-grid">
+        <div class="home-copy">
+          <p class="eyebrow">LETP239 · FALE/UFAL</p>
+          <h1 id="inicio-titulo">Pense.<br>Conecte.<br><em>Explique.</em></h1>
+          <p class="lead">Escolha um desafio, recupere o que você aprendeu e tente explicar antes de consultar a resposta.</p>
+          <div class="actions">
+            <a class="button primary" href="#praticar">Começar a praticar</a>
+            <a class="button quiet" href="#explorar">Explorar conteúdos</a>
+          </div>
+        </div>
+        <div class="method" aria-label="Como funciona">
+          <p><span>01</span> Sorteie um tópico</p>
+          <p><span>02</span> Leia o material</p>
+          <p><span>03</span> Prepare sua explicação</p>
+          <p><span>04</span> Fale sem consultar</p>
+          <p><span>05</span> Verifique e avalie</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="praticar" class="view" aria-labelledby="praticar-titulo">
+      <div class="section-head">
+        <p class="eyebrow">Recuperação ativa</p>
+        <h1 id="praticar-titulo">Praticar</h1>
+        <p>Uma sequência completa: leitura, preparação, explicação oral e verificação.</p>
+      </div>
+      <div class="practice-layout">
+        <aside class="practice-controls" aria-label="Opções da prática">
+          <div class="control-group"><label for="mode-select">Tipo de desafio</label><select id="mode-select">
+            <option value="misto">Desafio misto</option>
+            <option value="explique">Explique um conceito</option>
+            <option value="compare">Compare</option>
+            <option value="conecte">Conecte</option>
+            <option value="exemplo">Dê um exemplo</option>
+            <option value="problema">Identifique o problema</option>
+            <option value="autor">Quem propôs isso?</option>
+            <option value="tempo">Linha do tempo</option>
+          </select></div>
+          <div class="control-group"><label for="unit-select">Unidade</label><select id="unit-select"></select></div>
+          <div class="time-settings">
+            <div class="control-group"><label for="read-time">Tempo de leitura</label><select id="read-time"><option value="120">2 minutos</option><option value="180" selected>3 minutos</option><option value="300">5 minutos</option><option value="420">7 minutos</option></select></div>
+            <div class="control-group"><label for="study-time">Tempo de preparação e anotações</label><select id="study-time"><option value="60">1 minuto</option><option value="120" selected>2 minutos</option><option value="180">3 minutos</option><option value="300">5 minutos</option></select></div>
+            <div class="control-group"><label for="speak-time">Tempo de fala</label><select id="speak-time"><option value="60" selected>1 minuto</option><option value="120">2 minutos</option><option value="180">3 minutos</option><option value="300">5 minutos</option></select></div>
+          </div>
+          <button id="draw-button" class="button primary full" type="button">Sortear tópico</button>
+        </aside>
+        <article class="challenge" aria-live="polite">
+          <ol class="stage-track" aria-label="Etapas da atividade">
+            <li data-stage="read">Ler</li><li data-stage="study">Preparar</li><li data-stage="speak">Explicar</li><li data-stage="check">Verificar</li>
+          </ol>
+          <div class="challenge-meta">
+            <span id="challenge-unit">Curso inteiro</span>
+            <span id="challenge-mode">Explique</span>
+          </div>
+          <h2 id="challenge-title">Língua × fala</h2>
+          <div id="recording-setup" class="recording-setup" hidden>
+            <label class="recording-choice"><input id="recording-enabled" type="checkbox"> <span><strong>Gravar minha explicação e receber uma triagem formativa</strong><small>Opcional. O site não salva o áudio; a transcrição depende do serviço de reconhecimento de fala do navegador.</small></span></label>
+            <div id="audience-field" class="control-group" hidden><label for="audience-select">Público da explicação</label><select id="audience-select"><option value="graduacao">Colegas de graduação</option><option value="medio">Estudantes do ensino médio</option><option value="geral">Público não especialista</option></select></div>
+          </div>
+          <div class="phase-control">
+            <button id="stage-start" class="button dark full" type="button">Iniciar leitura</button>
+            <output id="timer-output" aria-label="Tempo restante">02:00</output>
+          </div>
+          <p id="stage-status" class="stage-status">A leitura permanece oculta até você iniciar.</p>
+          <div id="read-stage" class="stage-panel">
+            <p class="stage-label">Etapa 1 · Leitura</p>
+            <p class="stage-instruction">Leia com atenção. O conteúdo abaixo se adapta ao tempo escolhido e reúne apenas excertos de materiais acadêmicos.</p>
+            <div class="reading-meta"><span id="reading-length"></span><span id="reading-words"></span><span>Ortografia atualizada; formulação preservada</span></div>
+            <div id="reading-content" class="reading-material"></div>
+          </div>
+          <div id="study-stage" class="stage-panel" hidden>
+            <p class="stage-label">Etapa 2 · Preparação</p>
+            <p class="stage-instruction">O texto foi fechado. Use o tempo escolhido para fazer anotações breves e organizar a explicação. Ainda não fale.</p>
+            <ul class="study-cues"><li>Registre a ideia central em uma frase.</li><li>Anote dois pontos que precisam aparecer na explicação.</li><li>Escolha uma relação teórica e um exemplo claro.</li><li>Planeje como explicar o tópico a alguém que não conhece o assunto.</li></ul>
+          </div>
+          <div id="speak-stage" class="stage-panel" hidden>
+            <p class="stage-label">Etapa 3 · Prática oral</p>
+            <p id="challenge-prompt" class="challenge-prompt">Explique a distinção proposta por Saussure.</p>
+            <p class="stage-instruction">Explique em voz alta, sem consultar o material. Reconstrua a ideia com suas próprias palavras.</p>
+            <div id="recording-live" class="recording-live" hidden><span class="recording-dot" aria-hidden="true"></span><strong>Gravação em andamento</strong><button id="stop-recording" class="text-button" type="button">Encerrar gravação</button></div>
+          </div>
+          <div class="challenge-actions">
+            <button id="copy-button" class="button quiet" type="button">Copiar desafio</button>
+          </div>
+          <div id="feedback" class="feedback" hidden>
+            <section id="audio-feedback" class="audio-feedback" hidden>
+              <div class="audio-feedback-head"><div><p class="stage-label">Avaliação da explicação gravada</p><h3>Transcrição e devolutiva</h3></div><a id="download-recording" class="button quiet" download="explicacao-tl1.webm" hidden>Baixar gravação</a></div>
+              <p id="recording-message" class="stage-instruction"></p>
+              <label for="transcript-text"><strong>Transcrição</strong></label>
+              <textarea id="transcript-text" rows="7" spellcheck="true" placeholder="A transcrição aparecerá aqui. Você pode corrigi-la antes de reavaliar."></textarea>
+              <button id="evaluate-transcript" class="button dark" type="button">Avaliar transcrição</button>
+              <div id="automated-feedback" class="automated-feedback" aria-live="polite"></div>
+              <p class="privacy-note">A devolutiva é formativa e não atribui nota. Confira a transcrição: erros de reconhecimento podem afetar a análise.</p>
+            </section>
+            <div>
+              <h3>Pontos essenciais</h3>
+              <ul id="essential-list"></ul>
+            </div>
+            <div>
+              <h3>Exemplo ou aplicação</h3>
+              <p id="example-text"></p>
+            </div>
+            <div>
+              <h3>Atenção</h3>
+              <p id="error-text"></p>
+            </div>
+            <div>
+              <h3>Conexões</h3>
+              <div id="connection-list" class="chips"></div>
+            </div>
+            <p id="source-text" class="source"></p>
+            <div class="self-check">
+              <h3>Como foi sua resposta?</h3>
+              <div class="rating-buttons">
+                <button data-rating="consegui" type="button">Consegui explicar</button>
+                <button data-rating="parcial" type="button">Mais ou menos</button>
+                <button data-rating="rever" type="button">Preciso rever</button>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="como-usar" class="view" aria-labelledby="como-usar-titulo">
+      <div class="section-head"><p class="eyebrow">Roteiro do estudante</p><h1 id="como-usar-titulo">Como usar</h1><p>O site organiza uma pequena sessão de estudo. Não pule diretamente para a resposta.</p></div>
+      <ol class="guide">
+        <li><span>01</span><div><h2>Sorteie um tópico</h2><p>Escolha uma ou mais unidades e um formato. O sorteio evita que você estude apenas o que já domina.</p></div></li>
+        <li><span>02</span><div><h2>Leia durante o tempo previsto</h2><p>Localize a ideia central, as relações conceituais e um exemplo. O texto se amplia conforme o tempo escolhido; sugerimos três minutos para estudar um tópico novo.</p></div></li>
+        <li><span>03</span><div><h2>Feche o texto e prepare-se</h2><p>O material desaparece. Durante o tempo selecionado, faça anotações breves e organize uma explicação com ideia central, desenvolvimento, relação teórica e exemplo. O tempo padrão é de dois minutos, mas você pode escolher entre um e cinco minutos.</p></div></li>
+        <li><span>04</span><div><h2>Explique em voz alta</h2><p>Responda sem consultar o texto. Não tente recitar: reconstrua o conteúdo com suas próprias palavras.</p></div></li>
+        <li><span>05</span><div><h2>Verifique e avalie</h2><p>Compare sua resposta com os pontos essenciais e registre como foi seu desempenho. Se optar pela gravação, confira a transcrição e use a triagem automática como apoio formativo, não como nota ou avaliação docente.</p></div></li>
+      </ol>
+      <div class="guide-note"><strong>Importante:</strong> cada etapa só começa após o clique no botão do topo. Ao fim do tempo, a tela avança automaticamente e o material da etapa anterior desaparece. O histórico fica somente neste navegador e não vale nota. A gravação é opcional e só começa depois de sua autorização.</div>
+      <a class="button primary" href="#praticar">Iniciar uma sessão</a>
+    </section>
+
+    <section id="explorar" class="view" aria-labelledby="explorar-titulo">
+      <div class="section-head">
+        <p class="eyebrow">Mapa do curso</p>
+        <h1 id="explorar-titulo">Explorar</h1>
+        <p>Uma visão sintética das ideias, autores e relações que estruturam a disciplina.</p>
+      </div>
+      <div id="unit-list" class="unit-list"></div>
+    </section>
+
+    <section id="glossario" class="view" aria-labelledby="glossario-titulo">
+      <div class="section-head">
+        <p class="eyebrow">Consulta rápida</p>
+        <h1 id="glossario-titulo">Glossário</h1>
+        <label class="search-label" for="glossary-search">Pesquisar termo</label>
+        <input id="glossary-search" class="search" type="search" placeholder="Digite: valor, competência, fonologia…" autocomplete="off">
+      </div>
+      <p id="glossary-count" class="result-count"></p>
+      <div id="glossary-list" class="glossary-list"></div>
+    </section>
+
+    <section id="estudo" class="view" aria-labelledby="estudo-titulo">
+      <div class="section-head">
+        <p class="eyebrow">Somente neste dispositivo</p>
+        <h1 id="estudo-titulo">Meu estudo</h1>
+        <p>Seu histórico fica armazenado localmente no navegador. Nenhum dado pessoal é coletado.</p>
+      </div>
+      <div id="study-stats" class="stats"></div>
+      <div class="study-grid">
+        <div>
+          <h2>Conceitos para rever</h2>
+          <div id="review-list" class="review-list"></div>
+        </div>
+        <div>
+          <h2>Unidades mais praticadas</h2>
+          <div id="unit-stats" class="bar-list"></div>
+        </div>
+      </div>
+      <button id="clear-history" class="button danger" type="button">Apagar meu histórico</button>
+    </section>
+
+    <section id="sobre" class="view" aria-labelledby="sobre-titulo">
+      <div class="about">
+        <p class="eyebrow">Sobre o projeto</p>
+        <h1 id="sobre-titulo">Estudar é reconstruir relações.</h1>
+        <p>Este recurso acompanha a disciplina Teoria Linguística 1 e foi criado para apoiar leitura acadêmica, recuperação ativa, autoexplicação e comparação entre perspectivas teóricas.</p>
+        <p>Explicar um conteúdo em voz alta exige recuperar informações, estabelecer relações e organizar o raciocínio. Essa prática torna mais visíveis as lacunas de compreensão e pode contribuir para a consolidação do que foi estudado.</p>
+        <p>As explicações também podem ser dirigidas a pessoas não especializadas. Traduzir conceitos com precisão, sem depender de jargão desnecessário, desenvolve a comunicação científica e contribui para a popularização do conhecimento linguístico.</p>
+        <p>Os excertos e verbetes não substituem as aulas nem a leitura integral das obras. Eles servem como ponto de partida para revisar, conectar e aprofundar ideias.</p>
+        <hr>
+        <p><strong>Teoria Linguística 1</strong><br>Faculdade de Letras — Universidade Federal de Alagoas<br>Prof. Miguel Oliveira Jr.</p>
+        <p class="source-note">Base conceitual: bibliografia da disciplina e obras acadêmicas indicadas em cada verbete. Conteúdos controversos são apresentados como tais.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Teoria em Voz Alta · Teoria Linguística 1 · FALE/UFAL</p>
+    <p>Estude para explicar, não apenas para reconhecer.</p>
+  </footer>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="./data/conceitos.js"></script>
+  <script src="./data/leituras.js"></script>
+  <script src="./assets/js/app.js"></script>
+</body>
+</html>

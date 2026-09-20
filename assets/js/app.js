@@ -8,20 +8,8 @@ const storeKey='tl1-study-v1';
 let state=JSON.parse(localStorage.getItem(storeKey)||'{"sessions":0,"ratings":{},"units":{},"recent":[]}');
 let current=null, timer=null, remaining=120, currentStage='read', stageRunning=false;
 let mediaRecorder=null, audioStream=null, audioChunks=[], audioUrl='', recognition=null, transcriptFinal='';
-const modes=['explique','compare','conecte','exemplo','problema','autor','tempo'];
-const labels={explique:'Explique',compare:'Compare',conecte:'Conecte',exemplo:'Dê um exemplo',problema:'Identifique o problema',autor:'Quem propôs isso?',tempo:'Linha do tempo'};
-const unitFrames={
- ciencia:'Este tópico pertence ao estudo da Linguística como ciência. O ponto de partida é distinguir opinião sobre a língua de investigação sistemática: conceitos, dados e métodos precisam ser articulados para responder a uma pergunta clara.',
- historia:'Este tópico integra a história das reflexões sobre a linguagem. Ele deve ser compreendido em seu contexto intelectual, sem transformar a história da Linguística numa sequência linear de descobertas europeias.',
- 'seculo-xix':'Este tópico participa da consolidação dos estudos histórico-comparativos no século XIX. A questão central é como formular hipóteses históricas controladas a partir de correspondências observáveis entre línguas.',
- saussure:'Este tópico faz parte da concepção saussureana da língua como sistema. Por isso, não deve ser estudado isoladamente: seu sentido depende das relações que mantém com signo, valor, sistema e com o ponto de vista adotado pelo linguista.',
- desdobramentos:'Este tópico pertence a um dos desdobramentos do estruturalismo. As escolas estruturalistas compartilham a atenção às relações, mas não formam uma doutrina única: diferem quanto ao objeto, ao método e ao papel atribuído à função e ao uso.',
- gerativismo:'Este tópico integra o programa gerativista, que desloca o foco para o conhecimento linguístico e para as capacidades mentais que tornam possível adquirir e usar uma língua. Os conceitos devem ser situados no desenvolvimento histórico do programa.',
- funcionalismo:'Este tópico pertence às tradições funcionalistas. A estrutura linguística é examinada em relação a funções comunicativas, discurso, frequência e experiência de uso, sem que isso implique negar a existência de organização gramatical.',
- niveis:'Este tópico corresponde a um domínio de análise. O recorte ajuda a formular perguntas específicas, mas não cria uma fronteira absoluta: fenômenos reais frequentemente exigem a articulação de dois ou mais níveis.'
-};
 function save(){localStorage.setItem(storeKey,JSON.stringify(state))}
-function unitName(id){return units.find(u=>u.id===id)?.title||id}
+function unitName(id){return id==='all'?'Curso inteiro':(units.find(u=>u.id===id)?.title||id)}
 function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),1800)}
 function route(){
  const hash=(location.hash||'#inicio').split('?')[0], base=hash.split('/')[0], target=document.querySelector(base);
@@ -56,39 +44,60 @@ function makeChallenge(mode){
  const weighted=[...pool,...pool.filter(c=>!state.recent.includes(c.id)),...pool.filter(c=>reviewIds.includes(c.id)),...pool.filter(c=>reviewIds.includes(c.id))];
  const candidates=weighted.filter(x=>x.id!==state.recent.at(-1));
  let c=choose(candidates.length?candidates:weighted);
- mode=mode==='misto'?choose(['explique','exemplo']):mode;
- if(!['explique','exemplo','problema'].includes(mode))mode='explique';
+ mode=mode==='misto'?choose(['explique','exemplo','problema','compare','conecte']):mode;
+
  if(mode==='compare'){
-   const validPairs=window.TL1_COMPARISONS.filter(p=>byId[p[0]]&&byId[p[1]]);
+   const validPairs=(window.TL1_COMPARISONS||[]).filter(p=>byId[p[0]]&&byId[p[1]]&&readings[p[0]]&&readings[p[1]]);
    const pairs=validPairs.filter(p=>allowed.includes(byId[p[0]].unit)&&allowed.includes(byId[p[1]].unit));
-   const pair=choose(pairs.length?pairs:validPairs); const a=byId[pair[0]],b=byId[pair[1]];
-   return {id:a.id,title:`${a.title} × ${b.title}`,unit:a.unit,mode,prompt:'Em que esses conceitos diferem e qual é a relação entre eles? Não os trate automaticamente como opostos.',essential:[a.definition,b.definition,'A comparação deve explicitar critérios e relações, não apenas duas definições isoladas.'],error:`${a.error} Também evite: ${b.error.toLowerCase()}`,example:`Compare os exemplos: ${a.example} / ${b.example}`,connections:[a.id,b.id,...a.connections.slice(0,2)],source:`${a.source} · ${b.source}`};
+   const pair=choose(pairs.length?pairs:validPairs);
+   if(pair){
+     const a=byId[pair[0]], b=byId[pair[1]];
+     return {id:a.id,readingIds:[a.id,b.id],title:`${a.title} × ${b.title}`,unit:a.unit===b.unit?a.unit:'all',mode,prompt:'Compare os dois conceitos. Indique o critério da comparação e explique a relação entre eles.',essential:[a.definition,b.definition,'A relação entre os conceitos precisa ficar explícita.'],error:`${a.error} Também considere: ${b.error.toLowerCase()}`,example:`${a.example} / ${b.example}`,connections:[a.id,b.id,...a.connections.slice(0,2),...b.connections.slice(0,2)],source:`${a.source} · ${b.source}`};
+   }
+   mode='explique';
  }
  if(mode==='conecte'){
-   const rel=choose(c.connections.filter(id=>byId[id]))||c.connections[0], d=byId[rel];
-   return {...c,title:`${c.title} ↔ ${d?.title||rel}`,mode,prompt:'Que relação teórica, histórica ou analítica existe entre esses dois elementos?',essential:[c.definition,d?.definition||'Explicite a conexão no contexto da unidade.','Indique se a relação é de complementaridade, contraste, desenvolvimento ou interface.']};
+   const linked=c.connections.map(id=>byId[id]).filter(x=>x&&readings[x.id]&&x.id!==c.id);
+   const d=choose(linked.length?linked:pool.filter(x=>x.id!==c.id));
+   if(d)return {...c,readingIds:[c.id,d.id],title:`${c.title} ↔ ${d.title}`,unit:c.unit===d.unit?c.unit:'all',mode,prompt:'Explique a relação entre esses dois conceitos e mostre em que ponto eles se aproximam ou se distinguem.',essential:[c.definition,d.definition,'A relação entre os dois conceitos precisa ser explicada, e não apenas mencionada.'],connections:[c.id,d.id,...c.connections.slice(0,2),...d.connections.slice(0,2)],source:`${c.source} · ${d.source}`};
+   mode='explique';
  }
- if(mode==='exemplo')return {...c,mode,prompt:`Dê um exemplo que demonstre “${c.title}” e explique por que ele é adequado.`};
- if(mode==='problema')return {...c,mode,title:'Afirmação problemática',prompt:`“${c.error.replace(/[.]$/,'')}.” O que há de problemático nessa afirmação?`,essential:[c.definition,...c.essential]};
+ if(mode==='exemplo')return {...c,mode,prompt:`Apresente um exemplo de “${c.title}” e explique o que, no exemplo, corresponde ao conceito.`};
+ if(mode==='problema')return {...c,mode,title:'Afirmação problemática',prompt:`“${c.error.replace(/[.]$/,'')}.” Explique o problema dessa afirmação.`,essential:[c.definition,...c.essential]};
  if(mode==='autor'){
-   const authored=concepts.filter(x=>x.author&&allowed.includes(x.unit)); c=choose(authored.length?authored:pool);
+   const authored=pool.filter(x=>x.author);
+   const fallback=concepts.filter(x=>x.author&&readings[x.id]);
+   c=choose(authored.length?authored:fallback);
    return {...c,mode,title:'Autor ou tradição',prompt:`A que autor ou tradição se associa esta formulação? “${c.definition}”`,essential:[`Associação principal: ${c.author||unitName(c.unit)}.`,...c.essential]};
  }
  if(mode==='tempo'){
-   const timeline=['panini','comparativismo','neogramaticos','saussure','praga','distribucionalismo','mattoso','gramatica-gerativa','uso'].filter(id=>byId[id]&&allowed.includes(byId[id].unit));
-   const fallback=pool.map(x=>x.id).slice(0,3);
-   const picks=(timeline.length>=3?timeline:fallback).sort(()=>Math.random()-.5).slice(0,3);
-   return {...c,id:picks[0],title:picks.map(id=>byId[id].title).join(' · '),mode,prompt:'Organize historicamente esses elementos e explique uma relação de continuidade ou ruptura entre eles.',essential:['Estabeleça uma ordem histórica aproximada.', 'Evite apresentar a história da Linguística como progresso linear.', 'Explique ao menos uma mudança de objeto, método ou problema.'],example:'Uma resposta forte situa cada elemento e mostra o que muda, sem apagar continuidades.',connections:picks,source:picks.map(id=>byId[id].source).join(' · ')};
+   const picks=['sistema','competencia','uso'].filter(id=>byId[id]&&readings[id]);
+   const first=byId[picks[0]];
+   return {...first,id:first.id,readingIds:picks,unit:'all',title:picks.map(id=>byId[id].title).join(' · '),mode,prompt:'Situe esses conceitos em seus contextos históricos e explique uma mudança de foco entre as perspectivas que representam.',essential:['Sistema linguístico: estruturalismo saussureano e início do século XX.','Competência linguística: programa gerativista consolidado a partir da segunda metade do século XX.','Estrutura e uso: tradições funcionalistas desenvolvidas em diferentes vertentes ao longo do século XX.'],example:'Uma resposta pode contrastar o estudo da língua como sistema relacional, o conhecimento linguístico do falante e a explicação da estrutura em relação ao uso.',connections:picks,source:picks.map(id=>byId[id].source).join(' · ')};
  }
- return {...c,mode,prompt:`Explique “${c.title}” com suas próprias palavras e mostre por que esse conceito importa para a teoria.`};
+ return {...c,mode:'explique',prompt:`Explique “${c.title}” com suas próprias palavras e relacione o conceito ao quadro teórico em que ele aparece.`};
 }
 function readingHTML(ch,seconds){
- const mins=Math.round(seconds/60), reading=readings[ch.id];
- const selected=reading.blocks.filter(b=>b.t<=seconds);
- const groups=[];
- selected.forEach(b=>{const group=groups.find(g=>g.source===b.source);if(group)group.blocks.push(b);else groups.push({source:b.source,blocks:[b]})});
- const sections=groups.map((g,gi)=>`<section class="source-excerpt"><h3>${groups.length>1?`Síntese ${gi+1}`:'Síntese de leitura'}</h3><p class="reading-kind">Síntese didática fundamentada nas fontes indicadas</p>${g.blocks.map(b=>`<div class="synthesis"><p>${b.p}</p></div>`).join('')}<cite><strong>Base acadêmica:</strong> ${g.source}</cite></section>`);
- const words=selected.reduce((n,b)=>n+b.p.trim().split(/\s+/).length,0);
+ const mins=Math.round(seconds/60);
+ const ids=(ch.readingIds&&ch.readingIds.length?ch.readingIds:[ch.id]).filter(id=>readings[id]);
+ if(!ids.length){
+   $('#reading-length').textContent='';
+   $('#reading-words').textContent='';
+   return '<p>Não há percurso de leitura disponível para este desafio.</p>';
+ }
+ let depth=1;
+ if(ids.length===1)depth=seconds>=420?4:seconds>=300?3:seconds>=180?2:1;
+ else if(ids.length===2)depth=seconds>=420?3:seconds>=300?2:1;
+ else depth=seconds>=420?2:1;
+
+ let words=0;
+ const sections=ids.map(id=>{
+   const concept=byId[id], chosen=readings[id].blocks.slice(0,depth);
+   words+=chosen.reduce((n,b)=>n+b.p.trim().split(/\s+/).length,0);
+   const sources=[...new Set(chosen.map(b=>b.source))];
+   const title=ids.length>1?concept.title:'Síntese de leitura';
+   return `<section class="source-excerpt"><h3>${title}</h3><p class="reading-kind">Síntese didática baseada nas fontes indicadas</p>${chosen.map(b=>`<div class="synthesis"><p>${b.p}</p></div>`).join('')}<cite><strong>Base acadêmica:</strong> ${sources.join(' · ')}</cite></section>`;
+ });
  $('#reading-length').textContent=`Material para cerca de ${mins} ${mins===1?'minuto':'minutos'}`;
  $('#reading-words').textContent=`${words} palavras`;
  return sections.join('');
@@ -183,19 +192,27 @@ function norm(s){return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowe
 function keywords(s){return [...new Set(norm(s).split(' ').filter(w=>w.length>4&&!stopwords.has(w)))].slice(0,9)}
 function evaluateTranscript(){
  const raw=$('#transcript-text').value.trim(), text=norm(raw);
- if(text.split(' ').filter(Boolean).length<20){$('#automated-feedback').innerHTML='<p><strong>Não há fala suficiente para uma avaliação de conteúdo.</strong> Desenvolva a ideia central, apresente uma relação teórica e inclua um exemplo.</p>';return}
- const criteria=(current.essential||[]).map(item=>{const ks=keywords(item),hits=ks.filter(k=>text.includes(k));return {item,ok:hits.length>=Math.min(2,Math.max(1,Math.ceil(ks.length*.3)))} });
+ const count=raw.split(/\s+/).filter(Boolean).length;
+ if(count<20){
+   $('#automated-feedback').innerHTML='<p>A transcrição está curta para uma triagem de conteúdo. Desenvolva a explicação e compare-a depois com os pontos essenciais.</p>';
+   return;
+ }
+ const criteria=(current.essential||[]).map(item=>{
+   const ks=keywords(item), hits=ks.filter(k=>text.includes(k));
+   return {item,ok:hits.length>=Math.min(2,Math.max(1,Math.ceil(ks.length*.3)))};
+ });
  const covered=criteria.filter(c=>c.ok), missing=criteria.filter(c=>!c.ok);
  const hasExample=/por exemplo|como exemplo|podemos observar|observe|considere|imagine/.test(text);
- const hasStructure=/primeiro|em primeiro lugar|a ideia central|além disso|por outro lado|portanto|assim|em resumo|por fim/.test(text);
- const errorTerms=keywords(current.error||'').filter(k=>text.includes(k));
  const audience=$('#audience-select').value;
  const audienceLabel={graduacao:'colegas de graduação',medio:'estudantes do ensino médio',geral:'público não especialista'}[audience];
  const jargon=keywords(current.definition||'').filter(k=>text.includes(k));
- const score=Math.max(0,Math.min(100,Math.round((covered.length/Math.max(1,criteria.length))*65+(hasExample?15:0)+(hasStructure?10:0)+(raw.split(/\s+/).length>=60?10:5)-(errorTerms.length?10:0))));
- const strengths=[];if(covered.length)strengths.push(`A resposta recupera ${covered.length} de ${criteria.length} pontos essenciais previstos para o tópico.`);if(hasExample)strengths.push('Há sinalização explícita de exemplo ou aplicação.');if(hasStructure)strengths.push('A exposição apresenta marcadores que ajudam a acompanhar a progressão do raciocínio.');
- const improvements=[];if(missing.length)improvements.push(...missing.map(c=>`Desenvolva melhor: ${c.item}`));if(!hasExample)improvements.push('Inclua um exemplo e explique explicitamente por que ele demonstra o conceito.');if(!hasStructure)improvements.push('Organize a fala com ideia central, desenvolvimento e conclusão claramente reconhecíveis.');if(audience!=='graduacao'&&jargon.length)improvements.push(`Para ${audienceLabel}, explique termos técnicos antes de utilizá-los e verifique se o exemplo pode ser compreendido sem conhecimento prévio.`);if(errorTerms.length)improvements.push('Revise a resposta à luz do alerta conceitual apresentado na verificação; a correspondência de palavras não permite concluir sozinha que há erro.');
- $('#automated-feedback').innerHTML=`<span class="feedback-score">Cobertura formativa: ${score}%</span><h4>Pontos fortes</h4><ul>${(strengths.length?strengths:['A resposta foi registrada e pode ser comparada aos pontos essenciais abaixo.']).map(x=>`<li>${x}</li>`).join('')}</ul><h4>O que aprimorar</h4><ul>${(improvements.length?improvements:['A resposta cobre os critérios previstos. Tente agora torná-la mais concisa e adaptar o exemplo ao público escolhido.']).map(x=>`<li>${x}</li>`).join('')}</ul><h4>Clareza para ${audienceLabel}</h4><p>${audience==='graduacao'?'Mantenha a terminologia teórica, mas explicite as relações entre os conceitos e não suponha que o colega leu o mesmo trecho.':'Prefira frases diretas, defina o vocabulário especializado e parta de um exemplo cotidiano antes de apresentar a formulação teórica.'}</p>`;
+ const found=covered.length?covered.map(c=>`<li>${c.item}</li>`).join(''):'<li>Nenhuma correspondência lexical forte foi identificada. Isso pode refletir a formulação usada na fala ou erros da transcrição.</li>';
+ const checks=[];
+ missing.forEach(c=>checks.push(`Confira se sua explicação contempla: ${c.item}`));
+ if(!hasExample)checks.push('Veja se um exemplo ajudaria a tornar a explicação mais concreta.');
+ if(audience!=='graduacao'&&jargon.length)checks.push(`Para ${audienceLabel}, verifique se os termos técnicos usados foram explicados.`);
+ if(!checks.length)checks.push('Compare a transcrição com os pontos essenciais e verifique se as relações entre as ideias ficaram explícitas.');
+ $('#automated-feedback').innerHTML=`<h4>Correspondências encontradas</h4><ul>${found}</ul><h4>Confira na sua explicação</h4><ul>${checks.map(x=>`<li>${x}</li>`).join('')}</ul><p class="privacy-note">Esta triagem procura correspondências de palavras e expressões na transcrição. Ela não mede compreensão, precisão conceitual, qualidade da fala ou desempenho acadêmico.</p>`;
 }
 function renderStudy(){
  const ratings=Object.values(state.ratings), review=Object.entries(state.ratings).filter(([,r])=>r==='rever').map(([id])=>byId[id]).filter(Boolean);

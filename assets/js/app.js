@@ -83,13 +83,13 @@ function readingHTML(ch,seconds){
    return '<p>Não há percurso de leitura disponível para este desafio.</p>';
  }
  let depth=1;
- if(ids.length===1)depth=seconds>=420?4:seconds>=300?3:seconds>=180?2:1;
- else if(ids.length===2)depth=seconds>=420?3:seconds>=300?2:1;
- else depth=seconds>=420?2:1;
+ if(ids.length===2)depth=seconds>=420?4:seconds>=300?3:seconds>=180?2:1;
+ else if(ids.length>=3)depth=seconds>=420?3:seconds>=300?2:1;
 
  let words=0;
  const sections=ids.map(id=>{
-   const concept=byId[id], chosen=readings[id].blocks.slice(0,depth);
+   const concept=byId[id];
+   const chosen=ids.length===1?readings[id].blocks.filter(b=>b.t<=seconds):readings[id].blocks.slice(0,depth);
    words+=chosen.reduce((n,b)=>n+b.p.trim().split(/\s+/).length,0);
    const sources=[...new Set(chosen.map(b=>b.source))];
    const title=ids.length>1?concept.title:'Síntese de leitura';

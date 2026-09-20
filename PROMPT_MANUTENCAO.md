@@ -47,7 +47,7 @@ Antes de editar, confirme a estrutura atual. Na versão vigente, os principais a
 - `assets/css/styles.css`: identidade visual, layout, responsividade e estados;
 - `assets/js/app.js`: fluxo da atividade, cronômetros, sorteio, gravação, transcrição e avaliação;
 - `data/conceitos.js`: tópicos, glossário e relações conceituais;
-- `data/leituras.js`: percursos de leitura, excertos e referências;
+- `data/leituras.js`: percursos de leitura, sínteses didáticas, eventuais citações curtas e referências;
 - `README.md`: documentação geral;
 - `PROMPT_MANUTENCAO.md`: este protocolo;
 - `.nojekyll`: publicação estática;
@@ -132,7 +132,7 @@ Para cada tópico, verifique:
 
 - correspondência entre título e conteúdo;
 - correção conceitual;
-- coesão entre os excertos;
+- coesão entre os blocos de leitura;
 - progressão lógica;
 - suficiência para estudantes de graduação sem conhecimento prévio;
 - presença de definições, distinções e exemplos pertinentes;

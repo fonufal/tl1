@@ -2,6 +2,19 @@
 
 Você é responsável pela manutenção do site **Teoria em Voz Alta**, recurso didático da disciplina Teoria Linguística 1 da FALE/UFAL. Preserve sua finalidade: conduzir estudantes por uma sequência temporizada de sorteio do tópico, leitura acadêmica, preparação com anotações, prática oral e verificação.
 
+## Repositório e publicação — regra central
+
+1. A fonte oficial e única do site é o repositório público **`fonufal/tl1`**, disponível em `https://github.com/fonufal/tl1`.
+2. O site público a ser mantido é **`https://fonufal.github.io/tl1/`**, publicado pelo GitHub Pages a partir da branch `main`.
+3. Antes de qualquer alteração, recupere a versão mais recente da branch `main`. Não trabalhe sobre cópias locais antigas nem suponha que a versão mantida em outra plataforma esteja atualizada.
+4. Faça as alterações diretamente nos arquivos correspondentes do repositório `fonufal/tl1`. Não limite a mudança a uma prévia local, a um arquivo avulso, ao antigo projeto do Sites ou a outro repositório.
+5. Preserve o histórico do GitHub: não use *force push*, não apague o repositório, não substitua arquivos não relacionados e não reescreva commits anteriores.
+6. Use mensagens de commit breves e informativas, em português, que indiquem com precisão a alteração realizada.
+7. O site é estático. Os arquivos publicados ficam na raiz do repositório: `index.html`, `assets/css/styles.css`, `assets/js/app.js`, `data/conceitos.js` e `data/leituras.js`.
+8. O fluxo `.github/workflows/pages.yml` é responsável pela publicação. Não o remova nem modifique sem necessidade técnica comprovada.
+9. Depois de cada atualização, confirme que o commit chegou à branch `main`, acompanhe a execução **Publicar no GitHub Pages** e verifique o endereço público. O trabalho só está concluído quando a nova versão estiver acessível ou quando um bloqueio real de publicação for claramente informado.
+10. Se a publicação falhar, examine a execução no GitHub Actions, corrija a causa no próprio repositório e publique um novo commit. Não declare sucesso apenas porque os arquivos foram enviados.
+
 ## Princípios obrigatórios
 
 1. Não altere a identidade visual, a arquitetura da atividade ou a ordem das etapas sem solicitação expressa.
@@ -47,6 +60,6 @@ Você é responsável pela manutenção do site **Teoria em Voz Alta**, recurso 
 3. Confirme que todos os identificadores de tópicos, relações do glossário e fontes referenciadas existem.
 4. Verifique sintaxe dos arquivos JavaScript, acessibilidade por teclado, rótulos dos controles e ausência de rolagem horizontal.
 5. Faça uma leitura humana dos percursos alterados. Não considere testes automáticos suficientes para validar coerência acadêmica.
-6. Preserve o endereço público `https://tl1.miguel555163.chatgpt.site` e publique uma nova versão somente depois de concluir as verificações.
+6. Preserve o endereço público `https://fonufal.github.io/tl1/`, confirme a conclusão do GitHub Actions e verifique a versão publicada depois das alterações.
 
-Ao receber uma solicitação de manutenção, primeiro identifique os arquivos e tópicos afetados. Faça apenas as mudanças necessárias, apresente resumidamente o que foi modificado, quais fontes fundamentam alterações de conteúdo e quais limitações permanecem.
+Ao receber uma solicitação de manutenção, primeiro consulte a versão atual da branch `main`, identifique os arquivos e tópicos afetados e faça apenas as mudanças necessárias diretamente em `fonufal/tl1`. Ao concluir, informe o commit ou os arquivos alterados, o resultado da publicação no GitHub Pages, quais fontes fundamentam eventuais alterações de conteúdo e quais limitações permanecem.

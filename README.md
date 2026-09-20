@@ -10,7 +10,7 @@ Site didático para leitura acadêmica, preparação e prática oral na discipli
 ## Fluxo da atividade
 
 1. Sortear um tópico.
-2. Ler excertos acadêmicos durante o tempo selecionado.
+2. Ler sínteses didáticas fundamentadas em fontes acadêmicas durante o tempo selecionado.
 3. Preparar anotações sem consultar o texto.
 4. Explicar oralmente.
 5. Verificar os pontos essenciais e fazer a autoavaliação.
@@ -32,4 +32,4 @@ Não há login nem analytics. O histórico de estudo fica apenas no navegador. A
 
 ## Licença
 
-Código sob licença MIT. Os textos acadêmicos citados permanecem sujeitos aos direitos de seus autores e editoras.
+Código sob licença GPL-3.0. Os textos acadêmicos citados permanecem sujeitos aos direitos de seus autores e editoras.

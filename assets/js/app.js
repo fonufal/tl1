@@ -57,7 +57,7 @@ function makeChallenge(mode){
    mode='explique';
  }
  if(mode==='conecte'){
-   const linked=c.connections.map(id=>byId[id]).filter(x=>x&&readings[x.id]&&x.id!==c.id);
+   const linked=c.connections.map(id=>byId[id]).filter(x=>x&&readings[x.id]&&x.id!==c.id&&allowed.includes(x.unit));
    const d=choose(linked.length?linked:pool.filter(x=>x.id!==c.id));
    if(d)return {...c,readingIds:[c.id,d.id],title:`${c.title} ↔ ${d.title}`,unit:c.unit===d.unit?c.unit:'all',mode,prompt:'Explique a relação entre esses dois conceitos e mostre em que ponto eles se aproximam ou se distinguem.',essential:[c.definition,d.definition,'A relação entre os dois conceitos precisa ser explicada, e não apenas mencionada.'],connections:[c.id,d.id,...c.connections.slice(0,2),...d.connections.slice(0,2)],source:`${c.source} · ${d.source}`};
    mode='explique';
@@ -65,10 +65,7 @@ function makeChallenge(mode){
  if(mode==='exemplo')return {...c,mode,prompt:`Apresente um exemplo de “${c.title}” e explique o que, no exemplo, corresponde ao conceito.`};
  if(mode==='problema')return {...c,mode,title:'Afirmação problemática',prompt:`“${c.error.replace(/[.]$/,'')}.” Explique o problema dessa afirmação.`,essential:[c.definition,...c.essential]};
  if(mode==='autor'){
-   const authored=pool.filter(x=>x.author);
-   const fallback=concepts.filter(x=>x.author&&readings[x.id]);
-   c=choose(authored.length?authored:fallback);
-   return {...c,mode,title:'Autor ou tradição',prompt:`A que autor ou tradição se associa esta formulação? “${c.definition}”`,essential:[`Associação principal: ${c.author||unitName(c.unit)}.`,...c.essential]};
+   return {...c,mode,title:'Autor, tradição ou domínio',prompt:`A que autor, tradição ou domínio se associa esta formulação? “${c.definition}”`,essential:[`Associação principal: ${c.author||unitName(c.unit)}.`,...c.essential]};
  }
  if(mode==='tempo'){
    const picks=['sistema','competencia','uso'].filter(id=>byId[id]&&readings[id]);

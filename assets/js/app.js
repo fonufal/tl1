@@ -87,7 +87,7 @@ function readingHTML(ch,seconds){
  const selected=reading.blocks.filter(b=>b.t<=seconds);
  const groups=[];
  selected.forEach(b=>{const group=groups.find(g=>g.source===b.source);if(group)group.blocks.push(b);else groups.push({source:b.source,blocks:[b]})});
- const sections=groups.map((g,gi)=>`<section class="source-excerpt"><h3>${groups.length>1?`Seleção ${gi+1}`:'Leitura'}</h3>${g.blocks.map(b=>`<blockquote><p>${b.p}</p></blockquote>`).join('')}<cite>${g.source}</cite></section>`);
+ const sections=groups.map((g,gi)=>`<section class="source-excerpt"><h3>${groups.length>1?`Síntese ${gi+1}`:'Síntese de leitura'}</h3><p class="reading-kind">Síntese didática fundamentada nas fontes indicadas</p>${g.blocks.map(b=>`<div class="synthesis"><p>${b.p}</p></div>`).join('')}<cite><strong>Base acadêmica:</strong> ${g.source}</cite></section>`);
  const words=selected.reduce((n,b)=>n+b.p.trim().split(/\s+/).length,0);
  $('#reading-length').textContent=`Material para cerca de ${mins} ${mins===1?'minuto':'minutos'}`;
  $('#reading-words').textContent=`${words} palavras`;

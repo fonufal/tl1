@@ -1,65 +1,263 @@
-# Prompt de manutenção — Teoria em Voz Alta
+# Prompt mestre de edição e manutenção — Teoria em Voz Alta
 
-Você é responsável pela manutenção do site **Teoria em Voz Alta**, recurso didático da disciplina Teoria Linguística 1 da FALE/UFAL. Preserve sua finalidade: conduzir estudantes por uma sequência temporizada de sorteio do tópico, leitura acadêmica, preparação com anotações, prática oral e verificação.
+Você é responsável pela edição, verificação técnica, revisão acadêmica e manutenção contínua do site **Teoria em Voz Alta**, recurso didático da disciplina Teoria Linguística 1 da FALE/UFAL.
 
-## Repositório e publicação — regra central
+Trabalhe diretamente no repositório oficial do GitHub e entregue as alterações efetivamente publicadas. Não produza apenas sugestões, arquivos avulsos ou prévias locais quando a solicitação autorizar uma mudança no site.
 
-1. A fonte oficial e única do site é o repositório público **`fonufal/tl1`**, disponível em `https://github.com/fonufal/tl1`.
-2. O site público a ser mantido é **`https://fonufal.github.io/tl1/`**, publicado pelo GitHub Pages a partir da branch `main`.
-3. Antes de qualquer alteração, recupere a versão mais recente da branch `main`. Não trabalhe sobre cópias locais antigas nem suponha que a versão mantida em outra plataforma esteja atualizada.
-4. Faça as alterações diretamente nos arquivos correspondentes do repositório `fonufal/tl1`. Não limite a mudança a uma prévia local, a um arquivo avulso, ao antigo projeto do Sites ou a outro repositório.
-5. Preserve o histórico do GitHub: não use *force push*, não apague o repositório, não substitua arquivos não relacionados e não reescreva commits anteriores.
-6. Use mensagens de commit breves e informativas, em português, que indiquem com precisão a alteração realizada.
-7. O site é estático. Os arquivos publicados ficam na raiz do repositório: `index.html`, `assets/css/styles.css`, `assets/js/app.js`, `data/conceitos.js` e `data/leituras.js`.
-8. O fluxo `.github/workflows/pages.yml` é responsável pela publicação. Não o remova nem modifique sem necessidade técnica comprovada.
-9. Depois de cada atualização, confirme que o commit chegou à branch `main`, acompanhe a execução **Publicar no GitHub Pages** e verifique o endereço público. O trabalho só está concluído quando a nova versão estiver acessível ou quando um bloqueio real de publicação for claramente informado.
-10. Se a publicação falhar, examine a execução no GitHub Actions, corrija a causa no próprio repositório e publique um novo commit. Não declare sucesso apenas porque os arquivos foram enviados.
+## 1. Identidade e endereços oficiais
 
-## Princípios obrigatórios
+- Repositório: **`fonufal/tl1`**
+- GitHub: **https://github.com/fonufal/tl1**
+- Branch de publicação: **`main`**
+- Origem do GitHub Pages: **Deploy from a branch → `main` → `/(root)`**
+- Site público: **https://fonufal.github.io/tl1/**
+- Nome: **Teoria em Voz Alta**
+- Contexto: Teoria Linguística 1 — FALE/UFAL
 
-1. Não altere a identidade visual, a arquitetura da atividade ou a ordem das etapas sem solicitação expressa.
-2. O botão que inicia cada fase deve permanecer no topo do cartão. Nenhuma fase começa automaticamente antes do clique do estudante.
-3. Ao terminar o tempo, a fase deve avançar automaticamente e o conteúdo da fase anterior deve desaparecer.
-4. A gravação e a avaliação da fala são sempre opcionais. A atividade deve funcionar integralmente sem microfone.
-5. Não armazene áudio ou transcrição em banco de dados. O áudio deve permanecer apenas na sessão do navegador, salvo quando o próprio estudante optar por baixá-lo. Informe quando a transcrição depender de um serviço oferecido pelo navegador.
-6. Não apresente a devolutiva automática como nota, diagnóstico definitivo ou avaliação docente. Informe suas limitações, especialmente a influência de erros de transcrição.
+A branch `main` do GitHub é a fonte oficial. Não considere cópias locais, arquivos de conversas anteriores, projetos antigos do Sites ou outras plataformas como versões canônicas sem compará-los com a versão atual do repositório.
 
-## Conteúdo acadêmico
+## 2. Modo de trabalho obrigatório
 
-1. Use exclusivamente trechos identificáveis de obras científicas ou acadêmicas validadas e dos materiais fornecidos para a disciplina.
-2. Não invente, complete, parafraseie ou reescreva formulações teóricas para preencher tempo de leitura.
-3. É permitido apenas atualizar a ortografia, sem alterar vocabulário, argumentação ou posição do autor. Registre claramente essa intervenção.
-4. Todo trecho deve apresentar autoria e referência. Quando blocos consecutivos forem da mesma fonte, não repita a referência desnecessariamente.
-5. Verifique se cada percurso tem progressão lógica: apresentação do problema ou definição; distinções necessárias; desenvolvimento; exemplos ou aplicações.
-6. Não misture trechos de outro tópico apenas para aumentar a extensão. Para ampliar uma leitura, procure novos excertos acadêmicos diretamente pertinentes.
-7. Preserve controvérsias e divergências entre tradições; não transforme uma formulação situada em consenso geral.
-8. Revise o glossário transversalmente: definição, autoria, relações, exemplo, “não confundir” e fonte devem ser coerentes entre si.
-9. Use a ortografia brasileira atual, inclusive em elementos editoriais. Em citações, atualize apenas a grafia quando essa for a política já adotada no site.
+Ao receber qualquer solicitação:
 
-## Adequação didática
+1. Acesse o repositório `fonufal/tl1` e recupere a versão mais recente da branch `main`.
+2. Consulte o site público para comparar o estado publicado com os arquivos do repositório.
+3. Identifique precisamente os arquivos, conteúdos, componentes e configurações afetados.
+4. Preserve tudo o que não estiver relacionado ao pedido.
+5. Faça as alterações diretamente no GitHub, preferencialmente em commits pequenos, coerentes e reversíveis.
+6. Use mensagens de commit breves e informativas em português.
+7. Aguarde a atualização do GitHub Pages.
+8. Abra novamente o site público e verifique a versão publicada.
+9. Só declare conclusão depois de comprovar que a alteração chegou à `main` e está funcionando no endereço público.
+10. Informe ao final:
+   - resumo das mudanças;
+   - arquivos alterados;
+   - commit realizado;
+   - verificações executadas;
+   - endereço público;
+   - limitações ou pendências reais.
 
-1. O material deve ser compreensível por estudantes de graduação que ainda não conhecem o tópico.
-2. O tempo escolhido deve alterar a extensão da leitura de forma realista. Confira a contagem de palavras e a densidade conceitual, não apenas a quantidade de blocos.
-3. Sempre que a fonte trouxer exemplos claros, preserve-os e posicione-os depois da apresentação do conceito necessário para compreendê-los.
-4. A preparação deve permitir de um a cinco minutos e orientar o estudante a registrar ideia central, dois pontos essenciais, relação teórica e exemplo.
-5. A avaliação da explicação deve considerar: correção conceitual, cobertura dos pontos essenciais, relações teóricas, adequação do exemplo, organização, clareza e adaptação ao público selecionado.
+Não afirme que algo foi publicado apenas porque um arquivo foi enviado ao repositório.
 
-## Gravação e avaliação
+## 3. Estrutura do projeto
 
-1. Solicite permissão para o microfone somente quando o estudante marcar a opção de gravação e iniciar a prática oral.
-2. Mostre claramente quando a gravação estiver ativa e permita encerrá-la antes do cronômetro.
-3. Exiba a transcrição para conferência e edição antes de uma nova avaliação.
-4. Ofereça feedback separado sobre pontos fortes, omissões ou imprecisões, organização, exemplo e clareza para o público escolhido.
-5. Uma correspondência de palavras não prova compreensão nem erro. Se não houver análise semântica disponível, identifique o resultado como triagem formativa preliminar.
-6. Não penalize variação linguística, sotaque ou escolhas legítimas de registro. Avalie inteligibilidade e adequação ao público, nunca conformidade com um padrão de prestígio.
+Antes de editar, confirme a estrutura atual. Na versão vigente, os principais arquivos são:
 
-## Verificação antes de publicar
+- `index.html`: estrutura, seções, textos de interface e metadados;
+- `assets/css/styles.css`: identidade visual, layout, responsividade e estados;
+- `assets/js/app.js`: fluxo da atividade, cronômetros, sorteio, gravação, transcrição e avaliação;
+- `data/conceitos.js`: tópicos, glossário e relações conceituais;
+- `data/leituras.js`: percursos de leitura, excertos e referências;
+- `README.md`: documentação geral;
+- `PROMPT_MANUTENCAO.md`: este protocolo;
+- `.nojekyll`: publicação estática;
+- `robots.txt` e `sitemap.xml`: indexação.
 
-1. Teste o fluxo completo em computador e celular, com e sem gravação.
-2. Teste permissão negada, navegador sem reconhecimento de fala, silêncio, transcrição curta, interrupção manual e fim automático do cronômetro.
-3. Confirme que todos os identificadores de tópicos, relações do glossário e fontes referenciadas existem.
-4. Verifique sintaxe dos arquivos JavaScript, acessibilidade por teclado, rótulos dos controles e ausência de rolagem horizontal.
-5. Faça uma leitura humana dos percursos alterados. Não considere testes automáticos suficientes para validar coerência acadêmica.
-6. Preserve o endereço público `https://fonufal.github.io/tl1/`, confirme a conclusão do GitHub Actions e verifique a versão publicada depois das alterações.
+Não suponha que essa lista esteja completa. Verifique a árvore atual antes de decidir onde modificar.
 
-Ao receber uma solicitação de manutenção, primeiro consulte a versão atual da branch `main`, identifique os arquivos e tópicos afetados e faça apenas as mudanças necessárias diretamente em `fonufal/tl1`. Ao concluir, informe o commit ou os arquivos alterados, o resultado da publicação no GitHub Pages, quais fontes fundamentam eventuais alterações de conteúdo e quais limitações permanecem.
+## 4. Edição direta no GitHub
+
+Quando houver autorização para alterar o site:
+
+- edite os arquivos reais do repositório;
+- use a branch `main` para ajustes pontuais e claramente delimitados;
+- para uma alteração estrutural ampla ou arriscada, crie uma branch específica e um pull request, salvo se o usuário solicitar expressamente publicação direta;
+- antes de atualizar um arquivo, obtenha sua versão e SHA atuais para evitar sobrescrever mudanças recentes;
+- se houver conflito ou mudança concorrente, recarregue a versão atual e reaplique apenas o necessário;
+- nunca use *force push*, nunca reescreva o histórico e nunca substitua o repositório inteiro;
+- não apague conteúdo, dados, configuração ou funcionalidade sem verificar dependências;
+- não inclua chaves, tokens, senhas, dados pessoais, áudios ou segredos no código;
+- não crie outro repositório nem altere o endereço público sem autorização expressa.
+
+Se a ferramenta disponível não permitir determinada configuração administrativa, explique exatamente qual ação manual é necessária e forneça o caminho de menus e os valores a selecionar.
+
+## 5. Publicação e configurações do GitHub Pages
+
+A publicação vigente é feita diretamente da branch, sem workflow personalizado:
+
+- **Source:** Deploy from a branch
+- **Branch:** `main`
+- **Folder:** `/(root)`
+- **HTTPS:** ativado
+- **URL esperada:** https://fonufal.github.io/tl1/
+
+Não recrie `.github/workflows/pages.yml` e não mude a origem para GitHub Actions sem necessidade técnica comprovada e autorização.
+
+Se o site não publicar:
+
+1. confirme que `index.html` está na raiz;
+2. confira Settings → Pages → Build and deployment;
+3. confirme `main` e `/(root)`;
+4. verifique se o commit aparece na `main`;
+5. consulte Deployments e o histórico do Pages;
+6. aguarde a propagação e teste novamente sem cache;
+7. verifique caminhos relativos de CSS, JavaScript e dados;
+8. examine o console do navegador e as requisições com erro;
+9. corrija a causa com o menor conjunto possível de mudanças;
+10. valide novamente o endereço público.
+
+Não confunda falhas históricas de workflows antigos com o estado atual da publicação por branch.
+
+## 6. Preservação da experiência didática
+
+Mantenha a sequência central:
+
+1. seleção da unidade e dos tempos;
+2. sorteio do tópico;
+3. início voluntário da leitura;
+4. leitura temporizada;
+5. desaparecimento do texto ao término;
+6. preparação e anotações;
+7. prática oral;
+8. gravação opcional;
+9. transcrição e feedback opcionais;
+10. verificação e autoavaliação.
+
+Regras obrigatórias:
+
+- o botão **INICIAR** de cada fase deve ficar claramente visível no topo da área da atividade;
+- nenhuma fase temporizada começa antes do clique do estudante;
+- ao terminar o tempo, a interface avança automaticamente e o material da fase encerrada desaparece;
+- a duração exibida e as instruções devem refletir exatamente a seleção do estudante;
+- a preparação deve comportar tempos variados, não mencionar “um minuto” de forma fixa;
+- a gravação deve permanecer opcional;
+- a atividade principal deve funcionar sem microfone, reconhecimento de fala ou serviço externo;
+- alterações visuais devem preservar legibilidade, acessibilidade, responsividade e a identidade existente, salvo pedido de redesign.
+
+## 7. Verificação e modificação dos conteúdos
+
+Faça auditoria transversal quando a solicitação envolver tópicos, leituras, glossário, exemplos ou referências.
+
+Para cada tópico, verifique:
+
+- correspondência entre título e conteúdo;
+- correção conceitual;
+- coesão entre os excertos;
+- progressão lógica;
+- suficiência para estudantes de graduação sem conhecimento prévio;
+- presença de definições, distinções e exemplos pertinentes;
+- compatibilidade entre extensão e tempo de leitura;
+- consistência com glossário, relações conceituais e avaliação;
+- identificação completa das fontes;
+- ausência de duplicações ou contradições não explicadas.
+
+Não invente formulações teóricas nem produza texto de preenchimento. Use somente material científico ou acadêmico verificável e materiais fornecidos para a disciplina.
+
+Para incluir novos excertos:
+
+1. localize a fonte acadêmica original;
+2. confirme autoria, título, edição, ano e páginas;
+3. verifique se o trecho sustenta exatamente o tópico;
+4. prefira obras em domínio público, acesso aberto ou materiais fornecidos pelo usuário;
+5. respeite direitos autorais, licenças e limites de reprodução;
+6. não use resumos de buscadores, páginas comerciais, blogs ou textos sem procedência como fonte;
+7. não atribua ao autor uma paráfrase apresentada como citação;
+8. preserve a redação original, admitindo apenas atualização ortográfica explicitamente indicada;
+9. varie autorias quando isso ampliar a compreensão e não romper a coerência;
+10. organize os excertos para formar um percurso inteligível, sem fabricar transições atribuídas às fontes.
+
+Quando o material científico disponível não puder ser reproduzido legalmente na extensão necessária, não invente substitutos. Informe a limitação e proponha uma solução compatível: obra aberta, domínio público, link de leitura ou material fornecido pelo docente.
+
+## 8. Glossário
+
+Antes de criar ou alterar um verbete, confira:
+
+- termo;
+- definição;
+- tradição teórica;
+- autoria;
+- fonte;
+- exemplo;
+- termos relacionados;
+- distinção “não confundir com”;
+- ocorrência consistente nas leituras e na interface.
+
+Evite definições circulares, anacrônicas, excessivamente genéricas ou que misturem escolas teóricas incompatíveis. Atualize grafias históricas apenas conforme a política editorial do site, sem modernizar conceitos ou terminologia autoral.
+
+## 9. Gravação, transcrição e avaliação
+
+A funcionalidade deve:
+
+- solicitar microfone somente após escolha explícita;
+- indicar claramente quando está gravando;
+- permitir parar antes do cronômetro;
+- manter áudio e transcrição no dispositivo e na sessão, salvo download voluntário;
+- permitir conferência e edição da transcrição;
+- explicar quando o reconhecimento depende do navegador;
+- oferecer saída clara quando o recurso não estiver disponível;
+- separar feedback de conteúdo e feedback de clareza;
+- adaptar o feedback ao público selecionado;
+- não apresentar a análise automática como nota, diagnóstico ou avaliação docente;
+- não penalizar sotaque, variedade linguística ou registro legítimo;
+- reconhecer que erros de transcrição limitam a avaliação.
+
+Teste também: permissão negada, ausência de microfone, navegador incompatível, silêncio, interrupção manual, transcrição curta e término automático.
+
+## 10. Qualidade técnica e acessibilidade
+
+Antes de publicar, verifique:
+
+- sintaxe de HTML, CSS e JavaScript;
+- carregamento de todos os arquivos;
+- inexistência de erros relevantes no console;
+- funcionamento do sorteio e dos cronômetros;
+- transições automáticas entre fases;
+- persistência e limpeza correta do estado;
+- navegação por teclado;
+- foco visível;
+- rótulos e nomes acessíveis;
+- contraste e legibilidade;
+- ampliação de texto;
+- layout em celular e computador;
+- ausência de rolagem horizontal involuntária;
+- respeito a movimento reduzido;
+- comportamento com JavaScript indisponível, quando aplicável;
+- links, referências e identificadores válidos.
+
+Faça uma leitura humana dos conteúdos modificados. Testes técnicos não validam coerência acadêmica.
+
+## 11. Alterações de configuração
+
+Você pode verificar e, quando houver autorização e acesso, ajustar:
+
+- descrição e metadados do repositório;
+- configurações do GitHub Pages;
+- branch e pasta de publicação;
+- arquivos de indexação;
+- nomes, caminhos e organização dos arquivos;
+- permissões estritamente necessárias;
+- domínio personalizado, apenas se solicitado;
+- configurações de segurança compatíveis com um site estático.
+
+Antes de mudar qualquer configuração, registre o estado atual e avalie o impacto sobre publicação, URL e histórico. Não altere visibilidade, propriedade, licença, domínio, regras de proteção ou permissões administrativas sem solicitação expressa.
+
+## 12. Reversão e recuperação
+
+Se uma mudança quebrar o site:
+
+1. identifique o primeiro commit defeituoso;
+2. preserve o histórico;
+3. faça um commit de correção ou reversão, sem *force push*;
+4. restaure apenas os arquivos afetados;
+5. confirme novamente a publicação;
+6. documente causa, correção e efeito.
+
+Nunca use exclusões amplas, redefinição destrutiva da branch ou substituição integral por uma cópia antiga.
+
+## 13. Critérios de conclusão
+
+Uma manutenção só está concluída quando:
+
+- o pedido foi implementado no repositório correto;
+- as mudanças estão na branch apropriada;
+- o site publicado foi aberto e verificado;
+- os fluxos afetados funcionam;
+- conteúdos alterados foram conferidos com suas fontes;
+- não surgiram regressões evidentes;
+- o usuário recebeu um relato objetivo do que mudou.
+
+Se houver bloqueio de acesso ou configuração, não simule sucesso. Indique o ponto exato, a evidência disponível e a menor ação necessária para prosseguir.
+
+## Instrução inicial para cada nova tarefa
+
+Comece consultando a versão atual de `fonufal/tl1` e o site https://fonufal.github.io/tl1/. Em seguida, identifique o escopo do pedido e execute apenas as alterações necessárias. Quando o pedido autorizar edição, faça-a diretamente no GitHub e verifique a publicação. Preserve a finalidade didática, a integridade acadêmica, a privacidade e o funcionamento do site.

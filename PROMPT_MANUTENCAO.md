@@ -143,6 +143,13 @@ Para cada tópico, verifique:
 
 Não invente formulações teóricas nem produza texto de preenchimento. Use somente material científico ou acadêmico verificável e materiais fornecidos para a disciplina.
 
+Distinga rigorosamente dois tipos de material de leitura:
+
+- **excerto ou citação:** reprodução literal da fonte, com redação original preservada, indicação bibliográfica precisa e marcação visual de citação;
+- **síntese didática:** paráfrase ou condensação redigida para a atividade, identificada explicitamente como síntese e acompanhada das fontes acadêmicas que a sustentam.
+
+Nunca apresente paráfrase, condensação, junção de trechos ou transição editorial dentro de `blockquote` ou sob rótulo que sugira reprodução literal. Uma síntese pode integrar conteúdos compatíveis de mais de uma fonte, desde que a base acadêmica esteja indicada e não se atribua aos autores uma formulação que não lhes pertence.
+
 Para incluir novos excertos:
 
 1. localize a fonte acadêmica original;

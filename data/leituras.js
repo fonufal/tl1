@@ -81,19 +81,19 @@ const E={
   y15:{source:S.bazerman,p:'Austin mostrou que falar também pode constituir uma ação. Uma promessa cria um compromisso; em circunstâncias institucionais adequadas, uma declaração pode participar da realização de um casamento. O ato depende das palavras empregadas, de quem as profere e das condições da situação. A teoria dos atos de fala distingue o conteúdo produzido, a força do ato realizado ao dizer algo e os efeitos que o enunciado pode ter sobre os participantes. Essa distinção ajuda a explicar por que uma mesma forma linguística pode desempenhar funções diferentes em contextos diferentes.'},
   y16:{source:S.presupp,p:'Pressuposição e implicatura introduzem conteúdos implícitos por mecanismos diferentes. Em “Bianca parou de comer chocolate”, a interpretação normalmente pressupõe que Bianca comia chocolate antes; a cessação faz parte do conteúdo afirmado. “Bianca voltou a comer chocolate” pressupõe uma fase anterior de consumo e uma interrupção antes da retomada. A implicatura conversacional depende de inferências construídas a partir do enunciado e do contexto e, em muitos casos, pode ser cancelada sem contradição. A distinção permite descrever com mais precisão o que permanece implícito em cada tipo de interpretação.'}
 };
-function plan(ids){const cut=[120,180,300,420];return ids.map((id,i)=>({t:cut[i],source:E[id].source,p:E[id].p}))}
+function plan(ids){const cut=[120,120,180,300,300,420];return ids.map((id,i)=>({t:cut[i],source:E[id].source,p:E[id].p}))}
 window.TL1_READINGS={
- lingua:{blocks:plan(['s1','s3','s12','s13'])},
- fala:{blocks:plan(['s1','s9','s10','s11'])},
- signo:{blocks:plan(['s2','s3','s4','s5'])},
- arbitrariedade:{blocks:plan(['s4','s5','s3','s2'])},
- sistema:{blocks:plan(['s3','s6','s8','s7'])},
- competencia:{blocks:plan(['g3','g4','g2','g5'])},
- gramaticalidade:{blocks:plan(['g2','g3','g4','g5'])},
- 'gramatica-universal':{blocks:plan(['g6','g8','g9','g1'])},
- uso:{blocks:plan(['f1','f2','f3','f5'])},
- gramaticalizacao:{blocks:plan(['f6','f7','f8','f9'])},
- sintaxe:{blocks:plan(['y1','y2','y9','y11'])},
- pragmatica:{blocks:plan(['y6','y13','y15','y16'])},
+ lingua:{blocks:plan(['s1','s12','s13','s3','s2','s7'])},
+ fala:{blocks:plan(['s1','s9','s12','s10','s11','s13'])},
+ signo:{blocks:plan(['s2','s3','s4','s5','s6','s13'])},
+ arbitrariedade:{blocks:plan(['s4','s5','s2','s3','s12','s13'])},
+ sistema:{blocks:plan(['s3','s13','s6','s8','s7','s5'])},
+ competencia:{blocks:plan(['g3','g4','g2','g5','g1','g9'])},
+ gramaticalidade:{blocks:plan(['g2','g3','g4','g5','g7','g1'])},
+ 'gramatica-universal':{blocks:plan(['g6','g9','g8','g1','g7','g5'])},
+ uso:{blocks:plan(['f1','f2','f3','f5','f4','f8'])},
+ gramaticalizacao:{blocks:plan(['f1','f6','f7','f8','f9','f3'])},
+ sintaxe:{blocks:plan(['y1','y2','y3','y9','y11','y4'])},
+ pragmatica:{blocks:plan(['y6','y13','y8','y15','y12','y16'])},
 };
 })();

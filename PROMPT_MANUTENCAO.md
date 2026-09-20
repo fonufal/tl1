@@ -143,6 +143,8 @@ Para cada tópico, verifique:
 
 Não invente formulações teóricas nem produza texto de preenchimento. Use somente material científico ou acadêmico verificável e materiais fornecidos para a disciplina.
 
+Na redação didática, priorize clareza e naturalidade. Prefira frases declarativas de extensão moderada, exemplos concretos e transições discretas. Evite padrões recorrentes associados a texto gerado automaticamente, como sequências excessivamente simétricas, enumerações em série sem necessidade, contraste repetido em fórmulas do tipo “não X, mas Y”, metadiscurso como “o ponto central é”, “convém distinguir” ou “é importante observar”, conclusões genéricas e paráfrases que apenas repetem a frase anterior. Varie a estrutura sintática de modo natural e mantenha o vocabulário técnico apenas quando necessário ao conceito.
+
 Distinga rigorosamente dois tipos de material de leitura:
 
 - **excerto ou citação:** reprodução literal da fonte, com redação original preservada, indicação bibliográfica precisa e marcação visual de citação;

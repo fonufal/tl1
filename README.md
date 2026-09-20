@@ -15,7 +15,7 @@ Site didático para leitura acadêmica, preparação e prática oral na discipli
 4. Explicar oralmente.
 5. Verificar os pontos essenciais e fazer a autoavaliação.
 
-A gravação da explicação e a triagem formativa são opcionais. O site não mantém o áudio em banco de dados; o estudante pode baixar a própria gravação durante a sessão.
+A gravação da explicação e a triagem formativa são opcionais. O áudio permanece na sessão do navegador e pode ser baixado pelo estudante. A transcrição automática, quando disponível, depende do serviço de reconhecimento de fala oferecido pelo navegador.
 
 ## Estrutura
 
@@ -28,7 +28,7 @@ A gravação da explicação e a triagem formativa são opcionais. O site não m
 
 ## Privacidade
 
-Não há login nem analytics. O histórico de estudo fica apenas no navegador. A transcrição opcional depende do recurso de reconhecimento de fala oferecido pelo navegador.
+Não há login nem analytics. O histórico de estudo fica apenas no navegador. Se o estudante ativar a transcrição automática, o processamento pode depender de um serviço de reconhecimento de fala do próprio navegador ou de seu provedor.
 
 ## Licença
 

@@ -8,6 +8,7 @@ const storeKey='tl1-study-v1';
 let state=JSON.parse(localStorage.getItem(storeKey)||'{"sessions":0,"ratings":{},"units":{},"recent":[]}');
 let current=null, timer=null, remaining=120, currentStage='read', stageRunning=false;
 let mediaRecorder=null, audioStream=null, audioChunks=[], audioUrl='', recognition=null, transcriptFinal='';
+const challengeLabels={explique:'Explique',compare:'Compare',conecte:'Conecte',exemplo:'Dê um exemplo',problema:'Identifique o problema',autor:'Autor, tradição ou domínio',tempo:'Linha do tempo'};
 function save(){localStorage.setItem(storeKey,JSON.stringify(state))}
 function unitName(id){return id==='all'?'Curso inteiro':(units.find(u=>u.id===id)?.title||id)}
 function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),1800)}
@@ -103,7 +104,7 @@ function renderChallenge(ch,count=true){
  current=ch;if(count){state.sessions++;state.units[ch.unit]=(state.units[ch.unit]||0)+1;state.recent=[...state.recent,ch.id].slice(-8);save()}
  if(audioUrl){URL.revokeObjectURL(audioUrl);audioUrl=''}
  audioChunks=[];transcriptFinal='';$('#transcript-text').value='';$('#automated-feedback').innerHTML='';$('#audio-feedback').hidden=true;$('#download-recording').hidden=true;$('#recording-message').textContent='';
- $('#challenge-unit').textContent=unitName(ch.unit);$('#challenge-mode').textContent=labels[ch.mode];$('#challenge-title').textContent=ch.title;$('#challenge-prompt').textContent=ch.prompt;
+ $('#challenge-unit').textContent=unitName(ch.unit);$('#challenge-mode').textContent=challengeLabels[ch.mode]||'Explique';$('#challenge-title').textContent=ch.title;$('#challenge-prompt').textContent=ch.prompt;
  $('#reading-content').innerHTML=readingHTML(ch,Number($('#read-time').value));
  $('#essential-list').innerHTML=ch.essential.map(x=>`<li>${x}</li>`).join('');$('#example-text').textContent=ch.example;$('#error-text').textContent=ch.error;$('#source-text').textContent='Fonte: '+ch.source;
  $('#connection-list').innerHTML=[...new Set(ch.connections)].filter(id=>byId[id]).map(id=>`<a class="chip" href="#glossario/${id}">${byId[id].title}</a>`).join('');
@@ -118,8 +119,8 @@ function setStage(stage,running=false){
  ['read','study','speak'].forEach(s=>$('#'+s+'-stage').hidden=s!==stage||!running);
  $('#feedback').hidden=stage!=='check';
  $$('.stage-track li').forEach(li=>{const order=['read','study','speak','check'];li.classList.toggle('active',li.dataset.stage===stage);li.classList.toggle('done',order.indexOf(li.dataset.stage)<order.indexOf(stage))});
- const labels={read:'Iniciar leitura',study:'Iniciar preparação',speak:'Iniciar prática oral',check:'Sortear novo tópico'};
- $('#stage-start').textContent=labels[stage];$('#stage-start').hidden=running&&stage!=='check';
+ const stageLabels={read:'Iniciar leitura',study:'Iniciar preparação',speak:'Iniciar prática oral',check:'Sortear novo tópico'};
+ $('#stage-start').textContent=stageLabels[stage];$('#stage-start').hidden=running&&stage!=='check';
  $('#timer-output').hidden=stage==='check';$('#copy-button').hidden=stage!=='speak'||!running;
  $('#recording-setup').hidden=stage!=='speak'||running;$('#recording-live').hidden=stage!=='speak'||!running||!mediaRecorder;
  const status={read:'A leitura permanece oculta até você iniciar.',study:'A leitura foi encerrada e removida. Inicie a preparação quando estiver pronto.',speak:'A preparação terminou. Inicie a prática oral quando estiver pronto.',check:'Compare sua explicação com os pontos de verificação.'};

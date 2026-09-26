@@ -53,6 +53,7 @@ el("admin-login-btn")?.addEventListener("click", async () => {
 });
 el("admin-signout-btn")?.addEventListener("click", () => signOut(auth));
 el("create-class-btn")?.addEventListener("click", createClass);
+el("create-production-classes-btn")?.addEventListener("click", createProductionClasses);
 el("class-select")?.addEventListener("change", event => loadClass(event.target.value));
 el("toggle-selection-btn")?.addEventListener("click", () => toggleClassFlag("selectionOpen"));
 el("toggle-evaluation-btn")?.addEventListener("click", () => toggleClassFlag("evaluationOpen"));
@@ -151,6 +152,57 @@ async function createClass() {
   await refreshClasses();
   el("class-select").value = classId;
   await loadClass(classId);
+}
+
+async function createProductionClasses() {
+  clearAdminMessage();
+
+  const classes = [
+    { id: "tl1-2026-2-01", name: "TL1 — Turma 01", term: "2026.2" },
+    { id: "tl1-2026-2-02", name: "TL1 — Turma 02", term: "2026.2" }
+  ];
+
+  const batch = writeBatch(db);
+  const created = [];
+  const skipped = [];
+
+  for (const item of classes) {
+    const ref = doc(db, "classes", item.id);
+    const existing = await getDoc(ref);
+    if (existing.exists()) {
+      skipped.push(item.name);
+      continue;
+    }
+
+    batch.set(ref, {
+      name: item.name,
+      term: item.term,
+      presentationDate: "",
+      active: true,
+      selectionOpen: true,
+      evaluationOpen: false,
+      presentationSeconds: 180,
+      ratingSeconds: 30,
+      disabledTopics: [],
+      currentSessionId: null,
+      createdAt: serverTimestamp()
+    });
+    created.push(item.name);
+  }
+
+  if (created.length) await batch.commit();
+  await refreshClasses();
+
+  if (created.length && skipped.length) {
+    adminMessage(
+      "Criadas: " + created.join(", ") + ". Já existiam: " + skipped.join(", ") + ".",
+      "ok"
+    );
+  } else if (created.length) {
+    adminMessage("Turmas reais criadas: " + created.join(", ") + ".", "ok");
+  } else {
+    adminMessage("As duas turmas TL1 2026.2 já existem.", "ok");
+  }
 }
 
 async function loadClass(classId) {
@@ -401,15 +453,31 @@ async function renderResults() {
   const body = el("results-body");
   body.innerHTML = "";
 
+  const expectedPerPresenter = Math.max(0, registrations.size - 1);
+  let complete = 0;
+
   lastResults.forEach(row => {
+    const isComplete = row.count === expectedPerPresenter;
+    if (isComplete) complete++;
+
     const tr = document.createElement("tr");
     tr.innerHTML =
       "<td>" + escapeHtml(row.name) + "</td>" +
       "<td>" + escapeHtml(row.topic) + "</td>" +
-      "<td>" + row.count + "</td>" +
-      "<td>" + (row.count ? row.average.toFixed(2).replace(".", ",") : "—") + "</td>";
+      "<td>" + row.count + " / " + expectedPerPresenter + "</td>" +
+      "<td>" + (row.count ? row.average.toFixed(1).replace(".", ",") : "—") + "</td>";
     body.appendChild(tr);
   });
+
+  const summary = el("results-summary");
+  if (summary) {
+    summary.textContent = expectedPerPresenter
+      ? complete + " de " + lastResults.length +
+        " apresentadores receberam todas as " + expectedPerPresenter +
+        " avaliações esperadas."
+      : "Não há avaliadores suficientes para calcular uma média por pares.";
+  }
+
   show("results-wrap", true);
 }
 
@@ -446,7 +514,7 @@ async function downloadCsv() {
   const rows = lastResults || await computeResults();
   const header = ["nome","matricula","topico_id","topico","n_avaliacoes","media"];
   const data = [header, ...rows.map(r => [
-    r.name, r.matricula, r.topicId, r.topic, r.count, r.count ? r.average.toFixed(3) : ""
+    r.name, r.matricula, r.topicId, r.topic, r.count, r.count ? r.average.toFixed(1) : ""
   ])];
   const csv = data.map(row => row.map(csvCell).join(",")).join("\r\n");
   const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });

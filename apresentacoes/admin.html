@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TL1 — Painel do professor</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand"><strong>TL1</strong><span>painel do professor</span></div>
+      <div class="row">
+        <span id="admin-user-label" class="muted"></span>
+        <button id="admin-signout-btn" class="btn ghost hidden">Sair</button>
+      </div>
+    </header>
+
+    <div id="admin-setup-warning" class="notice danger hidden">
+      O Firebase ainda não foi configurado. Complete <code>firebase-config.js</code>.
+    </div>
+
+    <section id="admin-auth-card" class="card">
+      <h2>Acesso administrativo</h2>
+      <button id="admin-login-btn" class="btn">Entrar com Google</button>
+    </section>
+
+    <section id="not-admin-card" class="card hidden">
+      <h2>Primeiro acesso</h2>
+      <p>Esta conta ainda não está cadastrada como administradora. Copie o UID abaixo e crie no Firestore o documento <code>admins/UID</code> com o campo <code>active = true</code>.</p>
+      <code id="admin-uid"></code>
+    </section>
+
+    <section id="admin-app" class="hidden">
+      <div class="admin-layout">
+        <div>
+          <section class="card">
+            <div class="row space">
+              <div>
+                <h2>Turmas</h2>
+                <p class="muted">Selecione uma turma existente ou crie uma nova.</p>
+              </div>
+              <select id="class-select" style="max-width:340px"></select>
+            </div>
+            <div class="grid two" style="margin-top:14px">
+              <div class="field"><label>Identificador</label><input id="new-class-id" placeholder="tl1-2026-1-a"></div>
+              <div class="field"><label>Nome da turma</label><input id="new-class-name" placeholder="TL1 — Turma A"></div>
+              <div class="field"><label>Período</label><input id="new-class-term" placeholder="2026.1"></div>
+              <div class="field"><label>Data da apresentação</label><input id="new-class-date" type="date"></div>
+            </div>
+            <button id="create-class-btn" class="btn" style="margin-top:14px">Criar turma</button>
+          </section>
+
+          <section id="class-admin-card" class="card hidden">
+            <div class="row space">
+              <div>
+                <h2 id="admin-class-title"></h2>
+                <p id="admin-class-meta" class="muted"></p>
+              </div>
+              <div class="row">
+                <button id="toggle-selection-btn" class="btn secondary"></button>
+                <button id="toggle-evaluation-btn" class="btn secondary"></button>
+              </div>
+            </div>
+            <div class="notice">
+              Link dos alunos: <a id="student-link" target="_blank" rel="noopener"></a>
+            </div>
+            <div style="margin-top:18px">
+              <h3>Inscritos <span id="roster-count" class="pill"></span></h3>
+              <div style="overflow:auto">
+                <table>
+                  <thead><tr><th>Aluno</th><th>Matrícula</th><th>Tópico</th></tr></thead>
+                  <tbody id="roster-body"></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <section id="session-card" class="card hidden">
+            <div class="row space">
+              <div>
+                <h2>Sessão de apresentações</h2>
+                <p class="muted">3 minutos de apresentação + 30 segundos para avaliação e troca.</p>
+              </div>
+              <button id="create-session-btn" class="btn secondary">Sortear ordem</button>
+            </div>
+            <div id="session-controls" class="hidden">
+              <div class="muted">Apresentador</div>
+              <div id="admin-presenter-name" class="presenter"></div>
+              <div id="admin-presenter-topic" class="topic-current"></div>
+              <div id="main-timer" class="timer">03:00</div>
+              <div id="session-state" class="pill"></div>
+              <div class="row" style="margin-top:18px">
+                <button id="start-btn" class="btn big-action">INICIAR</button>
+                <button id="end-btn" class="btn secondary big-action">Encerrar etapa</button>
+                <button id="next-btn" class="btn secondary big-action">PRÓXIMO</button>
+              </div>
+              <div style="margin-top:24px">
+                <button id="results-btn" class="btn ghost">Ver resultados</button>
+                <button id="csv-btn" class="btn ghost">Baixar CSV</button>
+              </div>
+              <div id="results-wrap" class="hidden" style="margin-top:18px;overflow:auto">
+                <table><thead><tr><th>Aluno</th><th>Tópico</th><th>N</th><th>Média</th></tr></thead><tbody id="results-body"></tbody></table>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <aside>
+          <section id="qr-card" class="card hidden">
+            <h2>QR da turma</h2>
+            <p class="muted">Os alunos escaneiam uma vez. A página acompanha automaticamente a sessão.</p>
+            <div class="qr-wrap"><canvas id="qr-canvas"></canvas></div>
+          </section>
+        </aside>
+      </div>
+    </section>
+
+    <div id="admin-message" class="notice hidden"></div>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+  <script type="module" src="./admin.js"></script>
+</body>
+</html>

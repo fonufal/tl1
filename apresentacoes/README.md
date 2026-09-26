@@ -47,3 +47,32 @@ O projeto foi desenhado para permanecer no plano gratuito. Não habilite o plano
 9. Copiar `apps-script/Code.gs` para o Apps Script vinculado à planilha de dados e publicar como Web App.
 
 O arquivo `firebase-config.js` contém apenas configuração pública do cliente. A proteção dos dados depende das regras do Firestore, não de esconder essa configuração.
+
+
+## Fechamento de produção — 2026.2
+
+O painel administrativo inclui um atalho para criar as duas turmas reais:
+- `tl1-2026-2-01` — TL1 — Turma 01
+- `tl1-2026-2-02` — TL1 — Turma 02
+
+A data da apresentação pode permanecer vazia até ser definida.
+
+### Serviço de e-mail
+
+No Apps Script vinculado à planilha de dados:
+
+1. Copie integralmente `apps-script/Code.gs`.
+2. Em Configurações do projeto > Propriedades do script, crie:
+   - `FIREBASE_API_KEY`
+   - `FIREBASE_PROJECT_ID` = `tl1-apresentacoes`
+3. Execute manualmente `validateSetup()`.
+4. Execute manualmente `sendTestEmail()` e confirme o recebimento.
+5. Implantar > Nova implantação > Aplicativo da Web.
+6. Executar como: usuário que implantou.
+7. Acesso: qualquer pessoa, inclusive anônima. A segurança do endpoint é feita pela validação do token Firebase em `doPost`.
+8. Copie a URL terminada em `/exec` e coloque-a em `MAIL_WEBAPP_URL` de `runtime-config.js`.
+9. Execute uma vez `installDailyMailTrigger()` para criar o gatilho diário da fila.
+
+### Resultados
+
+O painel mostra, por aluno, o número de avaliações recebidas sobre o número esperado e a média com uma casa decimal. O CSV usa a mesma precisão.

@@ -37,15 +37,12 @@ function doPost(e) {
       return json_({ ok: false, error: 'registration_mismatch' });
     }
 
-    const key = sentKey_(classId, uid);
+    const sentKey = sentKey_(classId, uid);
+    const pendingKey = pendingKey_(classId, uid);
     const props = PropertiesService.getScriptProperties();
-    if (props.getProperty(key)) {
-      return json_({ ok: true, alreadySent: true });
-    }
 
-    if (MailApp.getRemainingDailyQuota() < 1) {
-      logEmail_(email, 'TL1 — confirmação de tópico', 'PENDENTE', 'Quota diária de e-mail esgotada.');
-      return json_({ ok: false, error: 'mail_quota_exhausted' });
+    if (props.getProperty(sentKey)) {
+      return json_({ ok: true, alreadySent: true });
     }
 
     const classData = firestoreGet_(
@@ -60,15 +57,23 @@ function doPost(e) {
 
     const subject = 'TL1 — tópico confirmado: ' + topic.title;
     const htmlBody = buildMessage_(registration, classData, topic);
-
-    MailApp.sendEmail({
-      to: email,
+    const payload = {
+      classId,
+      uid,
+      email,
       subject,
-      htmlBody,
-      name: 'Teoria Linguística 1'
-    });
+      htmlBody
+    };
 
-    props.setProperty(key, new Date().toISOString());
+    if (MailApp.getRemainingDailyQuota() < 1) {
+      props.setProperty(pendingKey, JSON.stringify(payload));
+      logEmail_(email, subject, 'PENDENTE', 'Quota diária de e-mail esgotada; envio colocado na fila.');
+      return json_({ ok: true, queued: true });
+    }
+
+    sendPayload_(payload);
+    props.setProperty(sentKey, new Date().toISOString());
+    props.deleteProperty(pendingKey);
     logEmail_(email, subject, 'ENVIADO', '');
     return json_({ ok: true });
   } catch (err) {
@@ -79,6 +84,82 @@ function doPost(e) {
   } finally {
     lock.releaseLock();
   }
+}
+
+/**
+ * Processa confirmações que ficaram na fila por falta de quota.
+ * Pode ser executada manualmente ou por um gatilho diário.
+ */
+function processPendingEmails() {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+
+  try {
+    const props = PropertiesService.getScriptProperties();
+    const all = props.getProperties();
+    const keys = Object.keys(all).filter(function(key) {
+      return key.indexOf('pending_') === 0;
+    }).sort();
+
+    let remaining = MailApp.getRemainingDailyQuota();
+    let sent = 0;
+
+    for (let i = 0; i < keys.length && remaining > 0; i++) {
+      const pendingKey = keys[i];
+      const payload = JSON.parse(all[pendingKey]);
+      const sentKey = sentKey_(payload.classId, payload.uid);
+
+      if (props.getProperty(sentKey)) {
+        props.deleteProperty(pendingKey);
+        continue;
+      }
+
+      try {
+        sendPayload_(payload);
+        props.setProperty(sentKey, new Date().toISOString());
+        props.deleteProperty(pendingKey);
+        logEmail_(payload.email, payload.subject, 'ENVIADO', 'Enviado a partir da fila.');
+        sent++;
+        remaining--;
+      } catch (err) {
+        logEmail_(payload.email, payload.subject, 'ERRO', String(err && err.message || err));
+        break;
+      }
+    }
+
+    return { sent, pending: Object.keys(props.getProperties()).filter(function(key) {
+      return key.indexOf('pending_') === 0;
+    }).length };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/**
+ * Instala um único gatilho diário para drenar a fila.
+ * Execute esta função uma vez, manualmente, depois de autorizar o script.
+ */
+function installDailyMailTrigger() {
+  const exists = ScriptApp.getProjectTriggers().some(function(trigger) {
+    return trigger.getHandlerFunction() === 'processPendingEmails';
+  });
+
+  if (!exists) {
+    ScriptApp.newTrigger('processPendingEmails')
+      .timeBased()
+      .everyDays(1)
+      .atHour(7)
+      .create();
+  }
+}
+
+function sendPayload_(payload) {
+  MailApp.sendEmail({
+    to: payload.email,
+    subject: payload.subject,
+    htmlBody: payload.htmlBody,
+    name: 'Teoria Linguística 1'
+  });
 }
 
 function verifyFirebaseUser_(idToken) {
@@ -153,7 +234,9 @@ function decodeValue_(value) {
 function getTopic_(topicId) {
   const ss = SpreadsheetApp.openById(TL1.SPREADSHEET_ID);
   const sheet = ss.getSheetByName(TL1.TOPICS_SHEET);
-  const values = sheet.getRange(2, 1, Math.max(0, sheet.getLastRow() - 1), 4).getValues();
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return null;
+  const values = sheet.getRange(2, 1, lastRow - 1, 4).getValues();
 
   for (let i = 0; i < values.length; i++) {
     if (String(values[i][0]) === String(topicId)) {
@@ -187,12 +270,20 @@ function buildMessage_(registration, classData, topic) {
 }
 
 function sentKey_(classId, uid) {
+  return 'mail_' + digest_(classId + '|' + uid);
+}
+
+function pendingKey_(classId, uid) {
+  return 'pending_' + digest_(classId + '|' + uid);
+}
+
+function digest_(value) {
   const bytes = Utilities.computeDigest(
     Utilities.DigestAlgorithm.SHA_256,
-    classId + '|' + uid,
+    value,
     Utilities.Charset.UTF_8
   );
-  return 'mail_' + bytes.map(function(b) {
+  return bytes.map(function(b) {
     const n = (b + 256) % 256;
     return ('0' + n.toString(16)).slice(-2);
   }).join('');

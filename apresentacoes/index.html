@@ -85,21 +85,32 @@
         <span id="available-count" class="pill"></span>
       </div>
 
+      <div class="notice" style="margin-bottom:16px">
+        Para confirmar que você pertence à turma, informe sua matrícula e o e-mail
+        cadastrado no SIGAA. Seu nome será recuperado da lista oficial.
+      </div>
       <div class="grid two">
-        <div class="field">
-          <label for="student-name">Nome</label>
-          <input id="student-name" autocomplete="name">
-        </div>
         <div class="field">
           <label for="student-id">Matrícula</label>
           <input id="student-id" inputmode="numeric" autocomplete="off">
         </div>
+        <div class="field">
+          <label for="student-roster-email">E-mail cadastrado no SIGAA</label>
+          <input id="student-roster-email" type="email" autocomplete="email">
+        </div>
       </div>
-      <div class="field" style="margin-top:14px">
-        <label for="topic-search">Filtrar tópicos</label>
-        <input id="topic-search" placeholder="Digite uma palavra do título ou autor">
+      <div class="row" style="margin-top:14px">
+        <button id="verify-student-btn" class="btn secondary">Verificar meus dados</button>
       </div>
-      <div id="topic-list" class="topic-list"></div>
+      <div id="identity-status" class="notice hidden" style="margin-top:14px"></div>
+
+      <div id="topic-picker" class="hidden">
+        <div class="field" style="margin-top:18px">
+          <label for="topic-search">Filtrar tópicos</label>
+          <input id="topic-search" placeholder="Digite uma palavra do título ou autor">
+        </div>
+        <div id="topic-list" class="topic-list"></div>
+      </div>
     </section>
 
     <section id="choice-card" class="card hidden">
@@ -111,6 +122,6 @@
 
     <div id="global-message" class="notice hidden"></div>
   </main>
-  <script type="module" src="./app.js?v=20260926-1615"></script>
+  <script type="module" src="./app.js?v=20260926-1935"></script>
 </body>
 </html>

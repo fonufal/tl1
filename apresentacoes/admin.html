@@ -48,7 +48,10 @@
               <div class="field"><label>Período</label><input id="new-class-term" placeholder="2026.1"></div>
               <div class="field"><label>Data da apresentação</label><input id="new-class-date" type="date"></div>
             </div>
-            <button id="create-class-btn" class="btn" style="margin-top:14px">Criar turma</button>
+            <div class="row" style="margin-top:14px">
+              <button id="create-class-btn" class="btn">Criar turma</button>
+              <button id="create-production-classes-btn" class="btn secondary">Criar turmas TL1 2026.2</button>
+            </div>
           </section>
 
           <section id="class-admin-card" class="card hidden">
@@ -103,7 +106,8 @@
                 <button id="csv-btn" class="btn ghost">Baixar CSV</button>
               </div>
               <div id="results-wrap" class="hidden" style="margin-top:18px;overflow:auto">
-                <table><thead><tr><th>Aluno</th><th>Tópico</th><th>N</th><th>Média</th></tr></thead><tbody id="results-body"></tbody></table>
+                <table><thead><tr><th>Aluno</th><th>Tópico</th><th>Avaliações</th><th>Média</th></tr></thead><tbody id="results-body"></tbody></table>
+                <p id="results-summary" class="muted" style="margin-top:12px"></p>
               </div>
             </div>
           </section>
@@ -122,6 +126,6 @@
     <div id="admin-message" class="notice hidden"></div>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
-  <script type="module" src="./admin.js?v=20260926-1630"></script>
+  <script type="module" src="./admin.js?v=20260926-1700"></script>
 </body>
 </html>

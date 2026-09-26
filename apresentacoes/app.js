@@ -405,7 +405,20 @@ async function renderSessionForStudent() {
 
     const evalId = session.currentPresenter.uid + "__" + user.uid;
     const evalRef = doc(db, "classes", classId, "sessions", session.id, "evaluations", evalId);
-    const existing = await getDoc(evalRef);
+
+    let existing = null;
+    try {
+      existing = await getDoc(evalRef);
+    } catch (err) {
+      console.error("Falha ao verificar avaliação existente", err);
+      el("evaluation-status").textContent =
+        "Não foi possível preparar a avaliação: " + (err.code || err.message);
+      message(
+        "Erro ao abrir o formulário de avaliação: " + (err.code || err.message),
+        "danger"
+      );
+      return;
+    }
 
     // A sessão pode ter mudado enquanto a avaliação já enviada era consultada.
     if (!activeSession || activeSession.id !== session.id || activeSession.status !== "rating") {

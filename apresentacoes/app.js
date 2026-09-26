@@ -26,6 +26,7 @@ let activeSession = null;
 let listeningSessionId = null;
 let selectedScore = null;
 let selectedScoreRoundId = null;
+let studentIdentity = null;
 
 function show(id, visible = true) {
   el(id)?.classList.toggle("hidden", !visible);
@@ -65,6 +66,7 @@ el("login-btn")?.addEventListener("click", async () => {
 el("signout-btn")?.addEventListener("click", () => signOut(auth));
 
 el("topic-search")?.addEventListener("input", renderTopics);
+el("verify-student-btn")?.addEventListener("click", verifyStudentIdentity);
 
 buildScoreOptions();
 el("submit-score-btn")?.addEventListener("click", submitEvaluation);
@@ -86,7 +88,8 @@ if (isFirebaseConfigured() && classId) {
     el("user-label").textContent = user.displayName || user.email || "";
     show("signout-btn", true);
     show("auth-card", false);
-    el("student-name").value = user.displayName || "";
+    const rosterEmail = el("student-roster-email");
+    if (rosterEmail && !rosterEmail.value) rosterEmail.value = user.email || "";
     await loadClassAndRegistration();
   });
 }
@@ -116,6 +119,9 @@ async function loadClassAndRegistration() {
     show("choice-card", false);
     show("evaluation-card", false);
     show("registration-card", true);
+    studentIdentity = null;
+    show("topic-picker", false);
+    show("identity-status", false);
     startClaimsListener();
   }
 
@@ -169,52 +175,159 @@ function renderTopics() {
   }
 }
 
+async function verifyStudentIdentity() {
+  clearMessage();
+  const matricula = normalizeMatricula(el("student-id").value);
+  const rosterEmail = normalizeEmail(el("student-roster-email").value);
+
+  if (matricula.length < 5) {
+    return message("Informe uma matrícula válida.", "danger");
+  }
+  if (!rosterEmail || !rosterEmail.includes("@")) {
+    return message("Informe o e-mail cadastrado no SIGAA.", "danger");
+  }
+
+  const eligibilityId = await sha256Hex(matricula + "|" + rosterEmail);
+  const eligibleRef = doc(db, "classes", classId, "eligible", eligibilityId);
+
+  try {
+    const snap = await getDoc(eligibleRef);
+    if (!snap.exists()) {
+      studentIdentity = null;
+      show("topic-picker", false);
+      return message(
+        "Não encontramos essa combinação de matrícula e e-mail na lista oficial desta turma.",
+        "danger"
+      );
+    }
+
+    const data = snap.data();
+    if (data.status && data.status !== "active") {
+      studentIdentity = null;
+      show("topic-picker", false);
+      return message("Seu cadastro não está ativo nesta turma. Procure o professor.", "danger");
+    }
+
+    if (data.boundUid && data.boundUid !== user.uid) {
+      studentIdentity = null;
+      show("topic-picker", false);
+      return message(
+        "Esta matrícula já foi vinculada a outra conta Google. Procure o professor.",
+        "danger"
+      );
+    }
+
+    studentIdentity = {
+      eligibilityId,
+      name: data.name,
+      matricula: data.matricula,
+      email: data.email,
+      emailNormalized: data.emailNormalized || rosterEmail
+    };
+
+    const status = el("identity-status");
+    status.textContent = "Cadastro confirmado: " + studentIdentity.name + ". Agora escolha seu tópico.";
+    status.className = "notice ok";
+    show("identity-status", true);
+    show("topic-picker", true);
+    renderTopics();
+  } catch (err) {
+    studentIdentity = null;
+    show("topic-picker", false);
+    message("Não foi possível verificar seus dados: " + err.message, "danger");
+  }
+}
+
 async function reserveTopic(topic) {
   clearMessage();
-  const name = el("student-name").value.trim();
-  const matricula = el("student-id").value.trim();
 
-  if (name.length < 2) return message("Informe seu nome.", "danger");
-  if (matricula.length < 3) return message("Informe sua matrícula.", "danger");
+  if (!studentIdentity) {
+    return message("Verifique primeiro sua matrícula e o e-mail cadastrado no SIGAA.", "danger");
+  }
 
-  const ok = confirm("Confirmar a escolha de “" + topic.title + "”? Depois da confirmação, somente o professor poderá alterar o tópico.");
+  const ok = confirm(
+    studentIdentity.name + ", confirmar a escolha de “" + topic.title +
+    "”? Depois da confirmação, somente o professor poderá alterar o tópico."
+  );
   if (!ok) return;
 
   const classRef = doc(db, "classes", classId);
   const regRef = doc(db, "classes", classId, "registrations", user.uid);
   const claimRef = doc(db, "classes", classId, "claims", topic.id);
   const rosterRef = doc(db, "classes", classId, "roster", user.uid);
+  const eligibleRef = doc(db, "classes", classId, "eligible", studentIdentity.eligibilityId);
 
   try {
     await runTransaction(db, async transaction => {
       const classSnap = await transaction.get(classRef);
       const regSnap = await transaction.get(regRef);
       const claimSnap = await transaction.get(claimRef);
+      const eligibleSnap = await transaction.get(eligibleRef);
 
       if (!classSnap.exists()) throw new Error("Turma não encontrada.");
+      if (!eligibleSnap.exists()) throw new Error("Cadastro autorizado não encontrado.");
+
       const currentClass = classSnap.data();
+      const eligible = eligibleSnap.data();
+
       if (!currentClass.selectionOpen) throw new Error("A escolha de tópicos foi encerrada.");
       if (regSnap.exists()) throw new Error("Você já escolheu um tópico nesta turma.");
       if (claimSnap.exists()) throw new Error("Este tópico acabou de ser escolhido por outro aluno.");
-      if ((currentClass.disabledTopics || []).includes(topic.id)) throw new Error("Este tópico não está habilitado para a turma.");
+      if ((currentClass.disabledTopics || []).includes(topic.id)) {
+        throw new Error("Este tópico não está habilitado para a turma.");
+      }
+
+      if (eligible.status && eligible.status !== "active") {
+        throw new Error("Seu cadastro não está ativo nesta turma.");
+      }
+      if (eligible.boundUid && eligible.boundUid !== user.uid) {
+        throw new Error("Esta matrícula já foi vinculada a outra conta Google.");
+      }
+      if (normalizeMatricula(eligible.matricula) !== studentIdentity.matricula) {
+        throw new Error("A matrícula não corresponde ao cadastro autorizado.");
+      }
+      if (normalizeEmail(eligible.emailNormalized || eligible.email) !== studentIdentity.emailNormalized) {
+        throw new Error("O e-mail não corresponde ao cadastro autorizado.");
+      }
 
       transaction.set(claimRef, { claimedAt: serverTimestamp() });
       transaction.set(regRef, {
         uid: user.uid,
-        name,
-        matricula,
-        email: user.email,
+        name: eligible.name,
+        matricula: eligible.matricula,
+        email: eligible.email,
+        authEmail: user.email,
         topicId: topic.id,
+        eligibilityId: studentIdentity.eligibilityId,
         createdAt: serverTimestamp()
       });
-      transaction.set(rosterRef, { name, topicId: topic.id });
+      transaction.set(rosterRef, {
+        name: eligible.name,
+        topicId: topic.id
+      });
+      transaction.update(eligibleRef, {
+        boundUid: user.uid,
+        boundAuthEmail: user.email,
+        topicId: topic.id,
+        boundAt: serverTimestamp()
+      });
     });
 
-    registration = { uid: user.uid, name, matricula, email: user.email, topicId: topic.id };
+    registration = {
+      uid: user.uid,
+      name: studentIdentity.name,
+      matricula: studentIdentity.matricula,
+      email: studentIdentity.email,
+      authEmail: user.email,
+      topicId: topic.id,
+      eligibilityId: studentIdentity.eligibilityId
+    };
+
     if (unsubscribeClaims) {
       unsubscribeClaims();
       unsubscribeClaims = null;
     }
+
     show("registration-card", false);
     show("choice-card", true);
     show("evaluation-card", true);
@@ -225,6 +338,22 @@ async function reserveTopic(topic) {
   } catch (err) {
     message(err.message || "Não foi possível reservar o tópico.", "danger");
   }
+}
+
+function normalizeMatricula(value) {
+  return String(value || "").replace(/\D/g, "");
+}
+
+function normalizeEmail(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+async function sha256Hex(value) {
+  const bytes = new TextEncoder().encode(value);
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(digest))
+    .map(byte => byte.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 function renderChoice() {

@@ -268,9 +268,12 @@ async function refreshAuthorizedCount() {
   if (!currentClassId) return;
   try {
     const snap = await getDocs(collection(db, "classes", currentClassId, "eligible"));
+    const bound = snap.docs.filter(d => Boolean(d.data().boundUid)).length;
     el("authorized-count").textContent = String(snap.size);
+    el("bound-count").textContent = String(bound);
   } catch (err) {
     el("authorized-count").textContent = "—";
+    el("bound-count").textContent = "—";
   }
 }
 

@@ -38,6 +38,10 @@ service cloud.firestore {
       return /databases/$(database)/documents/classes/$(classId)/claims/$(topicId);
     }
 
+    function eligiblePath(classId, eligibilityId) {
+      return /databases/$(database)/documents/classes/$(classId)/eligible/$(eligibilityId);
+    }
+
     function sessionPath(classId, sessionId) {
       return /databases/$(database)/documents/classes/$(classId)/sessions/$(sessionId);
     }
@@ -64,6 +68,42 @@ service cloud.firestore {
       allow list: if isAdmin();
       allow create, update, delete: if isAdmin();
 
+      match /eligible/{eligibilityId} {
+        allow get: if googleUser();
+        allow list: if isAdmin();
+        allow create, delete: if isAdmin();
+
+        allow update: if isAdmin()
+          || (
+            googleUser()
+            && (!('boundUid' in resource.data) || resource.data.boundUid == '')
+            && request.resource.data.keys().hasOnly([
+              'name', 'matricula', 'email', 'emailNormalized', 'course', 'status',
+              'importedAt', 'boundUid', 'boundAuthEmail', 'topicId', 'boundAt'
+            ])
+            && request.resource.data.name == resource.data.name
+            && request.resource.data.matricula == resource.data.matricula
+            && request.resource.data.email == resource.data.email
+            && request.resource.data.emailNormalized == resource.data.emailNormalized
+            && request.resource.data.course == resource.data.course
+            && request.resource.data.status == resource.data.status
+            && request.resource.data.importedAt == resource.data.importedAt
+            && request.resource.data.status == 'active'
+            && request.resource.data.boundUid == request.auth.uid
+            && request.resource.data.boundAuthEmail == request.auth.token.email
+            && validTopicId(request.resource.data.topicId)
+            && request.resource.data.boundAt == request.time
+            && getAfter(registrationPath(classId, request.auth.uid)).data.eligibilityId
+              == eligibilityId
+            && getAfter(registrationPath(classId, request.auth.uid)).data.matricula
+              == resource.data.matricula
+            && getAfter(registrationPath(classId, request.auth.uid)).data.email
+              == resource.data.email
+            && getAfter(registrationPath(classId, request.auth.uid)).data.topicId
+              == request.resource.data.topicId
+          );
+      }
+
       match /claims/{topicId} {
         allow get, list: if signedIn();
 
@@ -73,7 +113,13 @@ service cloud.firestore {
           && !(topicId in classData(classId).disabledTopics)
           && request.resource.data.keys().hasOnly(['claimedAt'])
           && request.resource.data.claimedAt == request.time
-          && getAfter(registrationPath(classId, request.auth.uid)).data.topicId == topicId;
+          && getAfter(registrationPath(classId, request.auth.uid)).data.topicId == topicId
+          && getAfter(
+            eligiblePath(
+              classId,
+              getAfter(registrationPath(classId, request.auth.uid)).data.eligibilityId
+            )
+          ).data.boundUid == request.auth.uid;
 
         allow update, delete: if isAdmin();
       }
@@ -86,22 +132,108 @@ service cloud.firestore {
           && request.auth.uid == uid
           && classData(classId).selectionOpen == true
           && request.resource.data.keys().hasOnly([
-            'uid', 'name', 'matricula', 'email', 'topicId', 'createdAt'
+            'uid', 'name', 'matricula', 'email', 'authEmail',
+            'topicId', 'eligibilityId', 'createdAt'
           ])
           && request.resource.data.uid == request.auth.uid
-          && request.resource.data.email == request.auth.token.email
+          && request.resource.data.authEmail == request.auth.token.email
           && request.resource.data.name is string
           && request.resource.data.name.size() >= 2
           && request.resource.data.name.size() <= 120
           && request.resource.data.matricula is string
-          && request.resource.data.matricula.size() >= 3
+          && request.resource.data.matricula.size() >= 5
           && request.resource.data.matricula.size() <= 40
+          && request.resource.data.email is string
+          && request.resource.data.email.size() >= 5
+          && request.resource.data.eligibilityId is string
+          && request.resource.data.eligibilityId.matches('^[0-9a-f]{64}
+
+        allow update, delete: if isAdmin();
+      }
+
+      match /roster/{uid} {
+        allow get, list: if isAdmin() || registered(classId);
+
+        allow create: if googleUser()
+          && request.auth.uid == uid
+          && request.resource.data.keys().hasOnly(['name', 'topicId'])
+          && request.resource.data.name is string
+          && request.resource.data.name.size() >= 2
+          && request.resource.data.name.size() <= 120
+          && validTopicId(request.resource.data.topicId)
+          && getAfter(registrationPath(classId, uid)).data.topicId == request.resource.data.topicId
+          && getAfter(registrationPath(classId, uid)).data.name == request.resource.data.name;
+
+        allow update, delete: if isAdmin();
+      }
+
+      match /sessions/{sessionId} {
+        allow get: if isAdmin() || registered(classId);
+        allow list: if isAdmin();
+        allow create, update, delete: if isAdmin();
+
+        match /evaluations/{evaluationId} {
+          // A registered student may read only the evaluation document that belongs
+          // to them for the presenter who is currently being rated. This also permits
+          // a get() on a document that does not exist yet, which the client uses to
+          // decide whether the student has already evaluated.
+          allow get: if isAdmin()
+            || (
+              registered(classId)
+              && evaluationId
+                == get(sessionPath(classId, sessionId)).data.currentPresenter.uid
+                  + '__' + request.auth.uid
+            );
+          allow list: if isAdmin();
+
+          allow create: if registered(classId)
+            && classData(classId).evaluationOpen == true
+            && get(sessionPath(classId, sessionId)).data.status == 'rating'
+            && get(sessionPath(classId, sessionId)).data.currentPresenter.uid
+              == request.resource.data.presenterUid
+            && request.resource.data.presenterUid != request.auth.uid
+            && request.resource.data.evaluatorUid == request.auth.uid
+            && evaluationId
+              == request.resource.data.presenterUid + '__' + request.auth.uid
+            && request.resource.data.roundId
+              == get(sessionPath(classId, sessionId)).data.roundId
+            && request.resource.data.score is number
+            && request.resource.data.score >= 0
+            && request.resource.data.score <= 10
+            && request.resource.data.submittedAt == request.time
+            && request.resource.data.keys().hasOnly([
+              'presenterUid', 'evaluatorUid', 'score', 'roundId', 'submittedAt'
+            ]);
+
+          allow update, delete: if isAdmin();
+        }
+      }
+    }
+  }
+}
+)
           && validTopicId(request.resource.data.topicId)
           && !(request.resource.data.topicId in classData(classId).disabledTopics)
           && request.resource.data.createdAt == request.time
-          && getAfter(claimPath(classId, request.resource.data.topicId)).data.claimedAt == request.time
-          && getAfter(rosterPath(classId, uid)).data.topicId == request.resource.data.topicId
-          && getAfter(rosterPath(classId, uid)).data.name == request.resource.data.name;
+          && get(eligiblePath(classId, request.resource.data.eligibilityId)).data.status == 'active'
+          && get(eligiblePath(classId, request.resource.data.eligibilityId)).data.name
+            == request.resource.data.name
+          && get(eligiblePath(classId, request.resource.data.eligibilityId)).data.matricula
+            == request.resource.data.matricula
+          && get(eligiblePath(classId, request.resource.data.eligibilityId)).data.email
+            == request.resource.data.email
+          && getAfter(eligiblePath(classId, request.resource.data.eligibilityId)).data.boundUid
+            == request.auth.uid
+          && getAfter(eligiblePath(classId, request.resource.data.eligibilityId)).data.boundAuthEmail
+            == request.auth.token.email
+          && getAfter(eligiblePath(classId, request.resource.data.eligibilityId)).data.topicId
+            == request.resource.data.topicId
+          && getAfter(claimPath(classId, request.resource.data.topicId)).data.claimedAt
+            == request.time
+          && getAfter(rosterPath(classId, uid)).data.topicId
+            == request.resource.data.topicId
+          && getAfter(rosterPath(classId, uid)).data.name
+            == request.resource.data.name;
 
         allow update, delete: if isAdmin();
       }

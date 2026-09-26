@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TL1 — Apresentações</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand"><strong>TL1</strong><span>apresentações</span></div>
+      <div class="row">
+        <span id="user-label" class="muted"></span>
+        <button id="signout-btn" class="btn ghost hidden">Sair</button>
+      </div>
+    </header>
+
+    <section class="card hero">
+      <div class="pill">Teoria Linguística 1</div>
+      <h1 id="class-title">Apresentações</h1>
+      <p id="class-subtitle" class="muted">Escolha de tópicos e avaliação por pares.</p>
+    </section>
+
+    <div id="setup-warning" class="notice danger hidden">
+      O Firebase ainda não foi configurado. Complete <code>firebase-config.js</code>.
+    </div>
+
+    <section id="auth-card" class="card">
+      <h2>Entrar</h2>
+      <p>Use uma conta Google. O e-mail autenticado será associado à sua inscrição e às avaliações.</p>
+      <button id="login-btn" class="btn">Entrar com Google</button>
+    </section>
+
+    <section id="no-class-card" class="card hidden">
+      <h2>Link da turma ausente</h2>
+      <p>Abra o endereço fornecido pelo professor. O link precisa conter o identificador da turma.</p>
+    </section>
+
+    <section id="registration-card" class="card hidden">
+      <div class="row space">
+        <div>
+          <h2>Escolha seu tópico</h2>
+          <p class="muted">Cada tópico pode ser escolhido por apenas um aluno nesta turma.</p>
+        </div>
+        <span id="available-count" class="pill"></span>
+      </div>
+
+      <div class="grid two">
+        <div class="field">
+          <label for="student-name">Nome</label>
+          <input id="student-name" autocomplete="name">
+        </div>
+        <div class="field">
+          <label for="student-id">Matrícula</label>
+          <input id="student-id" inputmode="numeric" autocomplete="off">
+        </div>
+      </div>
+      <div class="field" style="margin-top:14px">
+        <label for="topic-search">Filtrar tópicos</label>
+        <input id="topic-search" placeholder="Digite uma palavra do título ou autor">
+      </div>
+      <div id="topic-list" class="topic-list"></div>
+    </section>
+
+    <section id="choice-card" class="card hidden">
+      <h2>Seu tópico</h2>
+      <div id="choice-content"></div>
+      <p class="muted">A escolha é definitiva. Alterações precisam ser feitas pelo professor.</p>
+      <div id="mail-status" class="notice hidden"></div>
+    </section>
+
+    <section id="evaluation-card" class="card hidden">
+      <h2>Avaliação em sala</h2>
+      <div id="evaluation-status" class="notice">Aguardando a sessão de apresentações.</div>
+      <div id="presentation-box" class="hidden" style="margin-top:18px">
+        <div class="muted">Apresentando agora</div>
+        <div id="presenter-name" class="presenter"></div>
+        <div id="presenter-topic" class="topic-current"></div>
+      </div>
+      <div id="score-box" class="score-box hidden" style="margin-top:22px">
+        <p>A apresentação terminou. Você tem alguns segundos para registrar sua nota.</p>
+        <div class="row">
+          <div id="score-value" class="score-value">7,0</div>
+          <span class="muted">/ 10</span>
+        </div>
+        <input id="score-input" type="range" min="0" max="10" step="0.5" value="7">
+        <button id="submit-score-btn" class="btn big-action">Enviar avaliação</button>
+      </div>
+    </section>
+
+    <div id="global-message" class="notice hidden"></div>
+  </main>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

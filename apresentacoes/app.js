@@ -367,45 +367,57 @@ async function renderSessionForStudent() {
     return;
   }
 
+  const presenterIsUser = session.currentPresenter.uid === user.uid;
+  const topic = TOPIC_MAP[session.currentPresenter.topicId];
+
   show("presentation-box", true);
   el("presenter-name").textContent = session.currentPresenter.name || "";
-  const topic = TOPIC_MAP[session.currentPresenter.topicId];
   el("presenter-topic").textContent = topic?.title || session.currentPresenter.topicId;
 
   if (session.status === "ready") {
+    el("presenter-label").textContent = "Próximo apresentador";
     setEvaluationPhase("Próximo");
-    el("evaluation-status").textContent = "Próxima apresentação pronta. Aguarde o professor iniciar.";
-    return;
-  }
-
-  if (session.currentPresenter.uid === user.uid) {
-    if (session.status === "rating") {
-      setEvaluationPhase("Avaliação aberta", "rating-open");
-      el("evaluation-status").textContent = "Esta é a sua apresentação. Você não pode se autoavaliar.";
-      bringEvaluationIntoView();
-    } else {
-      setEvaluationPhase("Apresentando", "is-presenting");
-      el("evaluation-status").textContent = "Você está apresentando agora.";
-    }
+    el("evaluation-status").textContent = presenterIsUser
+      ? "Você é o próximo apresentador. Aguarde o professor iniciar."
+      : "Próxima apresentação pronta. Aguarde o professor iniciar.";
     return;
   }
 
   if (session.status === "presenting") {
+    el("presenter-label").textContent = "Apresentando agora";
     setEvaluationPhase("Apresentando", "is-presenting");
-    el("evaluation-status").textContent = "Apresentação em andamento. A avaliação abrirá ao final.";
+    el("evaluation-status").textContent = presenterIsUser
+      ? "Você está apresentando agora."
+      : "Apresentação em andamento. A avaliação abrirá ao final.";
     return;
   }
 
   if (session.status === "rating") {
+    el("presenter-label").textContent = "Apresentação concluída";
     setEvaluationPhase("AVALIAÇÃO ABERTA", "rating-open");
+
+    if (presenterIsUser) {
+      el("evaluation-status").textContent =
+        "Sua apresentação terminou. Você não pode se autoavaliar.";
+      bringEvaluationIntoView();
+      return;
+    }
+
     const evalId = session.currentPresenter.uid + "__" + user.uid;
     const evalRef = doc(db, "classes", classId, "sessions", session.id, "evaluations", evalId);
     const existing = await getDoc(evalRef);
+
+    // A sessão pode ter mudado enquanto a avaliação já enviada era consultada.
+    if (!activeSession || activeSession.id !== session.id || activeSession.status !== "rating") {
+      return renderSessionForStudent();
+    }
+
     if (existing.exists()) {
       el("evaluation-status").textContent = "Sua avaliação deste apresentador já foi enviada.";
       bringEvaluationIntoView();
       return;
     }
+
     el("evaluation-status").textContent = "Avalie agora: a janela de avaliação está aberta.";
     el("score-input").value = "7";
     el("score-value").textContent = "7,0";
@@ -415,8 +427,12 @@ async function renderSessionForStudent() {
   }
 
   if (session.status === "awaitingNext") {
+    el("presenter-label").textContent = "Apresentação concluída";
     setEvaluationPhase("Encerrada");
-    el("evaluation-status").textContent = "Avaliação encerrada. Aguarde o próximo apresentador.";
+    el("evaluation-status").textContent = presenterIsUser
+      ? "Sua apresentação e a avaliação foram encerradas. Aguarde o próximo apresentador."
+      : "Avaliação encerrada. Aguarde o próximo apresentador.";
+    return;
   }
 }
 

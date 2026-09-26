@@ -24,6 +24,8 @@ let unsubscribeClass = null;
 let unsubscribeSession = null;
 let activeSession = null;
 let listeningSessionId = null;
+let selectedScore = null;
+let selectedScoreRoundId = null;
 
 function show(id, visible = true) {
   el(id)?.classList.toggle("hidden", !visible);
@@ -64,10 +66,7 @@ el("signout-btn")?.addEventListener("click", () => signOut(auth));
 
 el("topic-search")?.addEventListener("input", renderTopics);
 
-el("score-input")?.addEventListener("input", event => {
-  el("score-value").textContent = formatScore(event.target.value);
-});
-
+buildScoreOptions();
 el("submit-score-btn")?.addEventListener("click", submitEvaluation);
 
 if (isFirebaseConfigured() && classId) {
@@ -356,12 +355,14 @@ async function renderSessionForStudent() {
   if (!session) return;
 
   if (session.status === "finished") {
+    clearScoreSelection();
     setEvaluationPhase("Concluída");
     el("evaluation-status").textContent = "Sessão concluída.";
     return;
   }
 
   if (!session.currentPresenter?.uid) {
+    clearScoreSelection();
     setEvaluationPhase("Aguardando");
     el("evaluation-status").textContent = "Aguardando o próximo apresentador.";
     return;
@@ -373,8 +374,10 @@ async function renderSessionForStudent() {
   show("presentation-box", true);
   el("presenter-name").textContent = session.currentPresenter.name || "";
   el("presenter-topic").textContent = topic?.title || session.currentPresenter.topicId;
+  renderNextPresenter(session);
 
   if (session.status === "ready") {
+    clearScoreSelection();
     el("presenter-label").textContent = "Próximo apresentador";
     setEvaluationPhase("Próximo");
     el("evaluation-status").textContent = presenterIsUser
@@ -432,14 +435,14 @@ async function renderSessionForStudent() {
     }
 
     el("evaluation-status").textContent = "Avalie agora: a janela de avaliação está aberta.";
-    el("score-input").value = "7";
-    el("score-value").textContent = "7,0";
+    prepareScoreSelection(session.roundId);
     show("score-box", true);
     bringEvaluationIntoView();
     return;
   }
 
   if (session.status === "awaitingNext") {
+    clearScoreSelection();
     el("presenter-label").textContent = "Apresentação concluída";
     setEvaluationPhase("Encerrada");
     el("evaluation-status").textContent = presenterIsUser
@@ -454,9 +457,13 @@ async function submitEvaluation() {
   const presenterUid = activeSession.currentPresenter?.uid;
   if (!presenterUid || presenterUid === user.uid) return;
 
+  if (selectedScore === null || selectedScoreRoundId !== activeSession.roundId) {
+    return message("Escolha uma nota antes de enviar a avaliação.", "danger");
+  }
+
   const button = el("submit-score-btn");
   button.disabled = true;
-  const score = Number(el("score-input").value);
+  const score = selectedScore;
   const evalId = presenterUid + "__" + user.uid;
   const evalRef = doc(db, "classes", classId, "sessions", activeSession.id, "evaluations", evalId);
 
@@ -469,6 +476,7 @@ async function submitEvaluation() {
       submittedAt: serverTimestamp()
     });
     show("score-box", false);
+    clearScoreSelection();
     el("evaluation-status").textContent = "Avaliação enviada. Obrigado.";
   } catch (err) {
     message("A avaliação não pôde ser registrada. Talvez a janela de avaliação já tenha sido encerrada.", "danger");
@@ -477,9 +485,75 @@ async function submitEvaluation() {
   }
 }
 
+function buildScoreOptions() {
+  const container = el("score-options");
+  if (!container) return;
+  container.innerHTML = "";
+
+  for (let score = 0; score <= 10; score += 1) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "score-option";
+    button.dataset.score = String(score);
+    button.textContent = String(score);
+    button.setAttribute("aria-label", "Nota " + score);
+    button.addEventListener("click", () => selectScore(score));
+    container.appendChild(button);
+  }
+}
+
+function prepareScoreSelection(roundId) {
+  if (selectedScoreRoundId !== roundId) {
+    selectedScore = null;
+    selectedScoreRoundId = roundId || null;
+  }
+  updateScoreSelectionUI();
+}
+
+function selectScore(score) {
+  selectedScore = Number(score);
+  selectedScoreRoundId = activeSession?.roundId || null;
+  updateScoreSelectionUI();
+}
+
+function clearScoreSelection() {
+  selectedScore = null;
+  selectedScoreRoundId = null;
+  updateScoreSelectionUI();
+}
+
+function updateScoreSelectionUI() {
+  const value = el("score-value");
+  if (value) value.textContent = selectedScore === null ? "—" : formatScore(selectedScore);
+
+  document.querySelectorAll(".score-option").forEach(button => {
+    const selected = selectedScore !== null && Number(button.dataset.score) === selectedScore;
+    button.classList.toggle("selected", selected);
+    button.setAttribute("aria-pressed", selected ? "true" : "false");
+  });
+
+  const submit = el("submit-score-btn");
+  if (submit) submit.disabled = selectedScore === null;
+}
+
+function renderNextPresenter(session) {
+  const order = Array.isArray(session.order) ? session.order : [];
+  const currentIndex = Number(session.currentIndex ?? -1);
+  const next = currentIndex >= 0 ? order[currentIndex + 1] : null;
+  const shouldShow = ["presenting", "rating", "awaitingNext"].includes(session.status) && next;
+
+  show("next-presenter-box", Boolean(shouldShow));
+  if (!shouldShow) return;
+
+  el("next-presenter-name").textContent = next.name || "";
+  const nextTopic = TOPIC_MAP[next.topicId];
+  el("next-presenter-topic").textContent = nextTopic?.title || next.topicId || "";
+}
+
 function resetEvaluationUI() {
   show("presentation-box", false);
   show("score-box", false);
+  show("next-presenter-box", false);
   const card = el("evaluation-card");
   card?.classList.remove("is-presenting", "rating-open");
   if (el("evaluation-phase")) el("evaluation-phase").textContent = "Aguardando";

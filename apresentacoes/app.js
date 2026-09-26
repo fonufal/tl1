@@ -197,7 +197,7 @@ async function reserveTopic(topic) {
       if (claimSnap.exists()) throw new Error("Este tópico acabou de ser escolhido por outro aluno.");
       if ((currentClass.disabledTopics || []).includes(topic.id)) throw new Error("Este tópico não está habilitado para a turma.");
 
-      transaction.set(claimRef, { uid: user.uid, claimedAt: serverTimestamp() });
+      transaction.set(claimRef, { claimedAt: serverTimestamp() });
       transaction.set(regRef, {
         uid: user.uid,
         name,

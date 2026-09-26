@@ -87,6 +87,22 @@
               </div>
             </div>
 
+            <div class="notice" style="margin-top:18px">
+              <div class="row space">
+                <div>
+                  <strong>Lista oficial de alunos</strong>
+                  <div class="muted" style="margin-top:4px">
+                    Autorizados nesta turma: <span id="authorized-count">0</span>.
+                    Importe diretamente o texto copiado do SIGAA.
+                  </div>
+                </div>
+                <div class="row">
+                  <input id="authorized-file" type="file" accept=".txt,text/plain,.json,application/json" style="max-width:320px">
+                  <button id="import-authorized-btn" class="btn secondary">Importar alunos autorizados</button>
+                </div>
+              </div>
+            </div>
+
             <div style="margin-top:18px">
               <h3>Inscritos <span id="roster-count" class="pill"></span></h3>
               <div style="overflow:auto">
@@ -145,6 +161,6 @@
     <div id="admin-message" class="notice hidden"></div>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
-  <script type="module" src="./admin.js?v=20260926-1715"></script>
+  <script type="module" src="./admin.js?v=20260926-1955"></script>
 </body>
 </html>

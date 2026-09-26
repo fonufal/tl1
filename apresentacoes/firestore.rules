@@ -128,8 +128,17 @@ service cloud.firestore {
         allow create, update, delete: if isAdmin();
 
         match /evaluations/{evaluationId} {
+          // A registered student may read only the evaluation document that belongs
+          // to them for the presenter who is currently being rated. This also permits
+          // a get() on a document that does not exist yet, which the client uses to
+          // decide whether the student has already evaluated.
           allow get: if isAdmin()
-            || (signedIn() && resource.data.evaluatorUid == request.auth.uid);
+            || (
+              registered(classId)
+              && evaluationId
+                == get(sessionPath(classId, sessionId)).data.currentPresenter.uid
+                  + '__' + request.auth.uid
+            );
           allow list: if isAdmin();
 
           allow create: if registered(classId)

@@ -163,6 +163,7 @@ async function loadClass(classId) {
   show("class-admin-card", false);
   show("session-card", false);
   show("qr-card", false);
+  show("projector-link", false);
 
   if (!currentClassId) return;
 
@@ -196,6 +197,12 @@ function renderClass() {
   el("student-link").href = url;
   el("student-link").textContent = url;
   renderQr(url);
+
+  const projector = el("projector-link");
+  if (projector) {
+    projector.href = APP_BASE_URL + "projector.html?turma=" + encodeURIComponent(currentClassId);
+    show("projector-link", true);
+  }
 }
 
 function renderRoster() {

@@ -453,9 +453,16 @@ async function downloadCsv() {
 
 function renderQr(url) {
   const canvas = el("qr-canvas");
-  if (!canvas || !window.QRCode) return;
-  window.QRCode.toCanvas(canvas, url, { width: 220, margin: 1 }, err => {
-    if (err) console.error(err);
+  if (!canvas || !window.QRious) return;
+
+  new window.QRious({
+    element: canvas,
+    value: url,
+    size: 220,
+    padding: 10,
+    level: "M",
+    background: "white",
+    foreground: "black"
   });
 }
 

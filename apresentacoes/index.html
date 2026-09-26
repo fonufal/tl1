@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TL1 — Apresentações</title>
-  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./styles.css?v=20260926-1535">
 </head>
 <body>
   <main class="shell">
@@ -35,6 +35,38 @@
     <section id="no-class-card" class="card hidden">
       <h2>Link da turma ausente</h2>
       <p>Abra o endereço fornecido pelo professor. O link precisa conter o identificador da turma.</p>
+    </section>
+
+    <section id="evaluation-card" class="card live-card hidden" aria-live="polite">
+      <div class="row space live-heading">
+        <div>
+          <div class="live-label">SESSÃO AO VIVO</div>
+          <h2 id="evaluation-title">Apresentações</h2>
+        </div>
+        <span id="evaluation-phase" class="pill live-phase">Aguardando</span>
+      </div>
+
+      <div id="evaluation-status" class="notice live-status">Aguardando a sessão de apresentações.</div>
+
+      <div id="presentation-box" class="hidden presentation-now">
+        <div class="muted">Apresentando agora</div>
+        <div id="presenter-name" class="presenter"></div>
+        <div id="presenter-topic" class="topic-current"></div>
+      </div>
+
+      <div id="score-box" class="score-box rating-panel hidden">
+        <div>
+          <div class="rating-label">AVALIAÇÃO ABERTA</div>
+          <h3>Avalie agora</h3>
+          <p>Registre sua nota antes de a janela de avaliação encerrar.</p>
+        </div>
+        <div class="row score-row">
+          <div id="score-value" class="score-value">7,0</div>
+          <span class="muted">/ 10</span>
+        </div>
+        <input id="score-input" type="range" min="0" max="10" step="0.5" value="7" aria-label="Nota de 0 a 10">
+        <button id="submit-score-btn" class="btn big-action">Enviar avaliação</button>
+      </div>
     </section>
 
     <section id="registration-card" class="card hidden">
@@ -70,27 +102,8 @@
       <div id="mail-status" class="notice hidden"></div>
     </section>
 
-    <section id="evaluation-card" class="card hidden">
-      <h2>Avaliação em sala</h2>
-      <div id="evaluation-status" class="notice">Aguardando a sessão de apresentações.</div>
-      <div id="presentation-box" class="hidden" style="margin-top:18px">
-        <div class="muted">Apresentando agora</div>
-        <div id="presenter-name" class="presenter"></div>
-        <div id="presenter-topic" class="topic-current"></div>
-      </div>
-      <div id="score-box" class="score-box hidden" style="margin-top:22px">
-        <p>A apresentação terminou. Você tem alguns segundos para registrar sua nota.</p>
-        <div class="row">
-          <div id="score-value" class="score-value">7,0</div>
-          <span class="muted">/ 10</span>
-        </div>
-        <input id="score-input" type="range" min="0" max="10" step="0.5" value="7">
-        <button id="submit-score-btn" class="btn big-action">Enviar avaliação</button>
-      </div>
-    </section>
-
     <div id="global-message" class="notice hidden"></div>
   </main>
-  <script type="module" src="./app.js?v=20260926-1525"></script>
+  <script type="module" src="./app.js?v=20260926-1535"></script>
 </body>
 </html>

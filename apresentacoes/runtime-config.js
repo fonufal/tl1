@@ -1,4 +1,4 @@
-import { FIREBASE_CONFIG } from "./firebase-config.js";
+import { FIREBASE_CONFIG } from "./firebase-config.js?v=20260926-1737";
 
 export { FIREBASE_CONFIG };
 

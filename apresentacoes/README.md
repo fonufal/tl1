@@ -99,3 +99,14 @@ A lista `eligible` não pode ser listada por alunos; somente administradores tê
 
 O painel do professor aceita arquivos TXT copiados diretamente da página de discentes do SIGAA ou um JSON com `name`, `matricula`, `email` e `course`.
 O painel verifica T01/T02 antes de importar e mostra o total de alunos autorizados da turma.
+
+
+## Link único para os alunos
+
+O endereço público principal é:
+
+`https://fonufal.github.io/tl1/apresentacoes/`
+
+Sem o parâmetro `turma`, a página funciona como portal de entrada e oferece Turma 01 e Turma 02. Após a escolha, o aluno é encaminhado ao fluxo da turma correspondente, onde matrícula e e-mail do SIGAA são verificados contra a lista oficial.
+
+Os links diretos por turma continuam existindo e são usados pelo QR e quando for conveniente abrir uma turma específica.

@@ -317,6 +317,11 @@ function buildMessage_(registration, classData, topic) {
     '<p>A apresentação terá <strong>3 minutos</strong>. O objetivo não é resumir todo o capítulo, mas responder de maneira sintética e compreensível à pergunta do título.</p>',
     '<p>Na preparação, organize a fala em torno de: uma resposta central; uma ou duas ideias que sustentem essa resposta; pelo menos um exemplo que torne o ponto compreensível; e um encerramento breve.</p>',
     '<p>No dia, a ordem será sorteada. Ao final de cada apresentação haverá uma janela curta para a avaliação da turma.</p>',
+    registration.authEmail
+      ? '<p style="color:#555"><strong>Conta Google usada para esta reserva:</strong> ' +
+        escapeHtml_(registration.authEmail) +
+        '. Se você não fez esta escolha, avise o professor.</p>'
+      : '',
     '<p>Teoria Linguística 1</p>'
   ].join('');
 }

@@ -19,9 +19,9 @@ function doPost(e) {
 
     const user = verifyFirebaseUser_(idToken);
     const uid = user.localId;
-    const email = user.email;
+    const authEmail = user.email;
 
-    if (!uid || !email || user.emailVerified !== true) {
+    if (!uid || !authEmail || user.emailVerified !== true) {
       return json_({ ok: false, error: 'unverified_user' });
     }
 
@@ -30,9 +30,11 @@ function doPost(e) {
       idToken
     );
 
-    if (!registration || registration.email !== email || registration.uid !== uid) {
+    if (!registration || registration.uid !== uid || registration.authEmail !== authEmail || !registration.email) {
       return json_({ ok: false, error: 'registration_mismatch' });
     }
+
+    const email = registration.email;
 
     const sentKey = sentKey_(classId, uid);
     const pendingKey = pendingKey_(classId, uid);

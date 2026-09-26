@@ -76,3 +76,26 @@ No Apps Script vinculado à planilha de dados:
 ### Resultados
 
 O painel mostra, por aluno, o número de avaliações recebidas sobre o número esperado e a média com uma casa decimal. O CSV usa a mesma precisão.
+
+
+## Controle de acesso por lista oficial
+
+As turmas reais usam uma subcoleção privada `eligible` no Firestore.
+
+Fluxo:
+1. O professor importa no admin a lista oficial do SIGAA.
+2. Cada registro autorizado é identificado por um SHA-256 de matrícula + e-mail do SIGAA.
+3. O aluno autentica com Google e informa matrícula + e-mail do SIGAA.
+4. Se a combinação existir, o nome é recuperado da lista oficial e o seletor de tópicos é liberado.
+5. No momento da reserva, a identidade autorizada, a conta Google, a matrícula e o tópico são vinculados na mesma transação.
+6. Uma identidade já vinculada não pode ser usada por uma segunda conta Google.
+7. Uma conta Google só pode ter um registro por turma.
+8. Pessoas que não estejam na lista oficial não conseguem reservar tópicos.
+9. O e-mail de confirmação é enviado para o endereço oficial da lista do SIGAA, mesmo que a conta Google usada para autenticação seja outra.
+
+A lista `eligible` não pode ser listada por alunos; somente administradores têm acesso de listagem. O aluno consegue consultar apenas um documento opaco cujo identificador deriva da combinação exata de matrícula e e-mail informados.
+
+### Importação das listas do SIGAA
+
+O painel do professor aceita arquivos TXT copiados diretamente da página de discentes do SIGAA ou um JSON com `name`, `matricula`, `email` e `course`.
+O painel verifica T01/T02 antes de importar e mostra o total de alunos autorizados da turma.

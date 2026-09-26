@@ -252,6 +252,10 @@ function renderClass() {
   el("class-presentation-seconds").value = Number(currentClass.presentationSeconds || 180);
   el("class-rating-seconds").value = Number(currentClass.ratingSeconds || 30);
 
+  const publicUrl = APP_BASE_URL;
+  el("public-student-link").href = publicUrl;
+  el("public-student-link").textContent = publicUrl;
+
   const url = APP_BASE_URL + "?turma=" + encodeURIComponent(currentClassId) + "#avaliar";
   el("student-link").href = url;
   el("student-link").textContent = url;

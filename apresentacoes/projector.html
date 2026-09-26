@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TL1 — Projeção</title>
+  <link rel="stylesheet" href="./styles.css?v=20260926-1630">
+</head>
+<body class="projection-body">
+  <main class="projection-shell">
+    <section id="projection-auth" class="projection-auth card">
+      <div class="brand"><strong>TL1</strong><span>tela de projeção</span></div>
+      <h1>Projeção da sessão</h1>
+      <p class="muted">Entre com a conta administrativa para acompanhar a apresentação em tempo real.</p>
+      <button id="projection-login-btn" class="btn">Entrar com Google</button>
+      <div id="projection-auth-message" class="notice danger hidden"></div>
+    </section>
+
+    <section id="projection-app" class="projection-stage hidden" aria-live="polite">
+      <header class="projection-topbar">
+        <div>
+          <div class="projection-kicker">TEORIA LINGUÍSTICA 1</div>
+          <div id="projection-class" class="projection-class"></div>
+        </div>
+        <button id="fullscreen-btn" class="btn ghost projection-fullscreen">Tela cheia</button>
+      </header>
+
+      <div class="projection-main">
+        <div id="projection-phase" class="projection-phase">AGUARDANDO</div>
+        <div id="projection-label" class="projection-label">Sessão de apresentações</div>
+        <div id="projection-name" class="projection-name">Aguardando início</div>
+        <div id="projection-topic" class="projection-topic"></div>
+        <div id="projection-timer" class="projection-timer">03:00</div>
+
+        <div id="projection-next" class="projection-next hidden">
+          <span class="projection-next-label">A SEGUIR</span>
+          <span id="projection-next-name" class="projection-next-name"></span>
+          <span class="projection-next-sep">·</span>
+          <span id="projection-next-topic" class="projection-next-topic"></span>
+        </div>
+      </div>
+
+      <footer class="projection-footer">
+        <span id="projection-status">Aguardando o professor.</span>
+      </footer>
+    </section>
+  </main>
+
+  <script type="module" src="./projector.js?v=20260926-1630"></script>
+</body>
+</html>

@@ -95,3 +95,64 @@ th { font-size: .85rem; color: var(--muted); }
   .topic .btn { grid-column: 1 / -1; }
   .shell { padding: 18px 14px 40px; }
 }
+
+/* Student live session: keep dynamic information unmistakable and near the top. */
+.live-card {
+  border: 2px solid var(--accent);
+  background: linear-gradient(180deg, #ffffff 0%, #f7fafc 100%);
+  box-shadow: 0 18px 42px rgba(20, 30, 40, .13);
+}
+.live-heading { margin-bottom: 14px; }
+.live-label,
+.rating-label {
+  font-size: .78rem;
+  font-weight: 850;
+  letter-spacing: .1em;
+  color: var(--accent);
+  margin-bottom: 5px;
+}
+.live-phase {
+  font-size: .86rem;
+  padding: 7px 11px;
+}
+.live-status {
+  font-weight: 700;
+  margin-bottom: 18px;
+}
+.presentation-now {
+  padding: 18px 0 4px;
+  border-top: 1px solid var(--line);
+}
+.live-card.is-presenting {
+  border-color: var(--accent);
+}
+.live-card.rating-open {
+  border-width: 3px;
+  box-shadow: 0 20px 48px rgba(20, 30, 40, .18);
+}
+.live-card.rating-open .live-phase,
+.live-card.rating-open .rating-label {
+  background: var(--accent);
+  color: white;
+  border-radius: 999px;
+  display: inline-block;
+  padding: 6px 10px;
+}
+.rating-panel {
+  margin-top: 20px;
+  padding: 20px;
+  border: 2px solid var(--accent);
+  border-radius: 14px;
+  background: white;
+}
+.rating-panel h3 {
+  font-size: 1.55rem;
+  margin: 8px 0 4px;
+}
+.rating-panel p { margin-top: 0; }
+.score-row { align-items: baseline; }
+@media (max-width: 760px) {
+  .live-card { padding: 18px; }
+  .presenter { font-size: 1.8rem; }
+  .rating-panel { padding: 16px; }
+}

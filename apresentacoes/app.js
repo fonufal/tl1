@@ -356,11 +356,13 @@ async function renderSessionForStudent() {
   if (!session) return;
 
   if (session.status === "finished") {
+    setEvaluationPhase("Concluída");
     el("evaluation-status").textContent = "Sessão concluída.";
     return;
   }
 
   if (!session.currentPresenter?.uid) {
+    setEvaluationPhase("Aguardando");
     el("evaluation-status").textContent = "Aguardando o próximo apresentador.";
     return;
   }
@@ -370,35 +372,51 @@ async function renderSessionForStudent() {
   const topic = TOPIC_MAP[session.currentPresenter.topicId];
   el("presenter-topic").textContent = topic?.title || session.currentPresenter.topicId;
 
+  if (session.status === "ready") {
+    setEvaluationPhase("Próximo");
+    el("evaluation-status").textContent = "Próxima apresentação pronta. Aguarde o professor iniciar.";
+    return;
+  }
+
   if (session.currentPresenter.uid === user.uid) {
-    el("evaluation-status").textContent = session.status === "rating"
-      ? "Esta é a sua apresentação. Autoavaliação não é permitida."
-      : "Sua apresentação está em andamento.";
+    if (session.status === "rating") {
+      setEvaluationPhase("Avaliação aberta", "rating-open");
+      el("evaluation-status").textContent = "Esta é a sua apresentação. Você não pode se autoavaliar.";
+      bringEvaluationIntoView();
+    } else {
+      setEvaluationPhase("Apresentando", "is-presenting");
+      el("evaluation-status").textContent = "Você está apresentando agora.";
+    }
     return;
   }
 
   if (session.status === "presenting") {
-    el("evaluation-status").textContent = "Apresentação em andamento. A avaliação será aberta ao final dos 3 minutos.";
+    setEvaluationPhase("Apresentando", "is-presenting");
+    el("evaluation-status").textContent = "Apresentação em andamento. A avaliação abrirá ao final.";
     return;
   }
 
   if (session.status === "rating") {
+    setEvaluationPhase("AVALIAÇÃO ABERTA", "rating-open");
     const evalId = session.currentPresenter.uid + "__" + user.uid;
     const evalRef = doc(db, "classes", classId, "sessions", session.id, "evaluations", evalId);
     const existing = await getDoc(evalRef);
     if (existing.exists()) {
-      el("evaluation-status").textContent = "Avaliação enviada para este apresentador.";
+      el("evaluation-status").textContent = "Sua avaliação deste apresentador já foi enviada.";
+      bringEvaluationIntoView();
       return;
     }
-    el("evaluation-status").textContent = "Avaliação aberta.";
+    el("evaluation-status").textContent = "Avalie agora: a janela de avaliação está aberta.";
     el("score-input").value = "7";
     el("score-value").textContent = "7,0";
     show("score-box", true);
+    bringEvaluationIntoView();
     return;
   }
 
-  if (session.status === "awaitingNext" || session.status === "ready") {
-    el("evaluation-status").textContent = "Avaliação encerrada. Aguardando o próximo apresentador.";
+  if (session.status === "awaitingNext") {
+    setEvaluationPhase("Encerrada");
+    el("evaluation-status").textContent = "Avaliação encerrada. Aguarde o próximo apresentador.";
   }
 }
 
@@ -433,6 +451,25 @@ async function submitEvaluation() {
 function resetEvaluationUI() {
   show("presentation-box", false);
   show("score-box", false);
+  const card = el("evaluation-card");
+  card?.classList.remove("is-presenting", "rating-open");
+  if (el("evaluation-phase")) el("evaluation-phase").textContent = "Aguardando";
+}
+
+function setEvaluationPhase(label, className = "") {
+  const card = el("evaluation-card");
+  card?.classList.remove("is-presenting", "rating-open");
+  if (className) card?.classList.add(className);
+  if (el("evaluation-phase")) el("evaluation-phase").textContent = label;
+}
+
+function bringEvaluationIntoView() {
+  const card = el("evaluation-card");
+  if (!card) return;
+  const rect = card.getBoundingClientRect();
+  if (rect.top < 0 || rect.top > window.innerHeight * 0.65) {
+    card.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 }
 
 function cleanupListeners() {

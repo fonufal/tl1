@@ -57,6 +57,7 @@ el("create-production-classes-btn")?.addEventListener("click", createProductionC
 el("class-select")?.addEventListener("change", event => loadClass(event.target.value));
 el("toggle-selection-btn")?.addEventListener("click", () => toggleClassFlag("selectionOpen"));
 el("toggle-evaluation-btn")?.addEventListener("click", () => toggleClassFlag("evaluationOpen"));
+el("save-class-settings-btn")?.addEventListener("click", saveClassSettings);
 el("create-session-btn")?.addEventListener("click", createSession);
 el("start-btn")?.addEventListener("click", startCurrentPresentation);
 el("end-btn")?.addEventListener("click", endCurrentPhase);
@@ -245,6 +246,10 @@ function renderClass() {
   el("toggle-selection-btn").textContent = currentClass.selectionOpen ? "Fechar escolhas" : "Abrir escolhas";
   el("toggle-evaluation-btn").textContent = currentClass.evaluationOpen ? "Fechar avaliação" : "Abrir avaliação";
 
+  el("class-presentation-date").value = currentClass.presentationDate || "";
+  el("class-presentation-seconds").value = Number(currentClass.presentationSeconds || 180);
+  el("class-rating-seconds").value = Number(currentClass.ratingSeconds || 30);
+
   const url = APP_BASE_URL + "?turma=" + encodeURIComponent(currentClassId) + "#avaliar";
   el("student-link").href = url;
   el("student-link").textContent = url;
@@ -277,6 +282,29 @@ function renderRoster() {
 async function toggleClassFlag(field) {
   if (!currentClassId || !currentClass) return;
   await updateDoc(doc(db, "classes", currentClassId), { [field]: !currentClass[field] });
+}
+
+async function saveClassSettings() {
+  if (!currentClassId || !currentClass) return;
+
+  const presentationDate = el("class-presentation-date").value || "";
+  const presentationSeconds = Number(el("class-presentation-seconds").value);
+  const ratingSeconds = Number(el("class-rating-seconds").value);
+
+  if (!Number.isFinite(presentationSeconds) || presentationSeconds < 10 || presentationSeconds > 1800) {
+    return adminMessage("O tempo de apresentação deve ficar entre 10 e 1800 segundos.", "danger");
+  }
+  if (!Number.isFinite(ratingSeconds) || ratingSeconds < 10 || ratingSeconds > 300) {
+    return adminMessage("O tempo de avaliação deve ficar entre 10 e 300 segundos.", "danger");
+  }
+
+  await updateDoc(doc(db, "classes", currentClassId), {
+    presentationDate,
+    presentationSeconds,
+    ratingSeconds
+  });
+
+  adminMessage("Configurações da turma salvas.", "ok");
 }
 
 async function createSession() {

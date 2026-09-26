@@ -157,6 +157,61 @@ function sendPayload_(payload) {
   });
 }
 
+/**
+ * Valida a configuração antes da publicação do web app.
+ * Execute manualmente uma vez no editor do Apps Script.
+ */
+function validateSetup() {
+  const props = PropertiesService.getScriptProperties();
+  const apiKey = props.getProperty('FIREBASE_API_KEY');
+  const projectId = props.getProperty('FIREBASE_PROJECT_ID');
+
+  if (!apiKey) throw new Error('Defina FIREBASE_API_KEY nas propriedades do script.');
+  if (!projectId) throw new Error('Defina FIREBASE_PROJECT_ID nas propriedades do script.');
+
+  const ss = SpreadsheetApp.openById(TL1.SPREADSHEET_ID);
+  if (!ss.getSheetByName(TL1.TOPICS_SHEET)) {
+    throw new Error('A aba TOPICOS não foi encontrada.');
+  }
+  if (!ss.getSheetByName(TL1.EMAIL_LOG_SHEET)) {
+    throw new Error('A aba EMAIL_LOG não foi encontrada.');
+  }
+
+  return {
+    ok: true,
+    projectId: projectId,
+    spreadsheet: ss.getName(),
+    remainingMailQuota: MailApp.getRemainingDailyQuota()
+  };
+}
+
+/**
+ * Envia um e-mail de teste ao proprietário do script.
+ * Execute manualmente depois de validateSetup().
+ */
+function sendTestEmail() {
+  const recipient = Session.getEffectiveUser().getEmail();
+  if (!recipient) throw new Error('Não foi possível determinar o e-mail do proprietário do script.');
+
+  MailApp.sendEmail({
+    to: recipient,
+    subject: 'TL1 — teste do serviço de confirmação',
+    htmlBody:
+      '<p>O serviço de e-mail da plataforma TL1 está funcionando.</p>' +
+      '<p>Este é apenas um teste de configuração.</p>',
+    name: 'Teoria Linguística 1'
+  });
+
+  logEmail_(
+    recipient,
+    'TL1 — teste do serviço de confirmação',
+    'TESTE',
+    ''
+  );
+
+  return { ok: true, recipient: recipient };
+}
+
 function verifyFirebaseUser_(idToken) {
   const props = PropertiesService.getScriptProperties();
   const apiKey = props.getProperty('FIREBASE_API_KEY');

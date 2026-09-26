@@ -68,6 +68,25 @@
             <div class="notice">
               Link dos alunos: <a id="student-link" target="_blank" rel="noopener"></a>
             </div>
+
+            <div class="grid two" style="margin-top:18px">
+              <div class="field">
+                <label for="class-presentation-date">Data da apresentação</label>
+                <input id="class-presentation-date" type="date">
+              </div>
+              <div class="field">
+                <label for="class-presentation-seconds">Tempo de apresentação (segundos)</label>
+                <input id="class-presentation-seconds" type="number" min="10" max="1800" step="5">
+              </div>
+              <div class="field">
+                <label for="class-rating-seconds">Tempo para avaliação (segundos)</label>
+                <input id="class-rating-seconds" type="number" min="10" max="300" step="5">
+              </div>
+              <div class="field" style="align-content:end">
+                <button id="save-class-settings-btn" class="btn secondary">Salvar configurações</button>
+              </div>
+            </div>
+
             <div style="margin-top:18px">
               <h3>Inscritos <span id="roster-count" class="pill"></span></h3>
               <div style="overflow:auto">
@@ -126,6 +145,6 @@
     <div id="admin-message" class="notice hidden"></div>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
-  <script type="module" src="./admin.js?v=20260926-1700"></script>
+  <script type="module" src="./admin.js?v=20260926-1715"></script>
 </body>
 </html>

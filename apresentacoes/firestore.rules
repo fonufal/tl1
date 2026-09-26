@@ -6,6 +6,12 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function googleUser() {
+      return signedIn()
+        && request.auth.token.email_verified == true
+        && request.auth.token.firebase.sign_in_provider == 'google.com';
+    }
+
     function adminPath() {
       return /databases/$(database)/documents/admins/$(request.auth.uid);
     }
@@ -61,13 +67,11 @@ service cloud.firestore {
       match /claims/{topicId} {
         allow get, list: if signedIn();
 
-        allow create: if signedIn()
-          && request.auth.token.email_verified == true
+        allow create: if googleUser()
           && classData(classId).selectionOpen == true
           && validTopicId(topicId)
           && !(topicId in classData(classId).disabledTopics)
-          && request.resource.data.keys().hasOnly(['uid', 'claimedAt'])
-          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.keys().hasOnly(['claimedAt'])
           && request.resource.data.claimedAt == request.time
           && getAfter(registrationPath(classId, request.auth.uid)).data.topicId == topicId;
 
@@ -78,9 +82,8 @@ service cloud.firestore {
         allow get: if isAdmin() || (signedIn() && request.auth.uid == uid);
         allow list: if isAdmin();
 
-        allow create: if signedIn()
+        allow create: if googleUser()
           && request.auth.uid == uid
-          && request.auth.token.email_verified == true
           && classData(classId).selectionOpen == true
           && request.resource.data.keys().hasOnly([
             'uid', 'name', 'matricula', 'email', 'topicId', 'createdAt'
@@ -96,8 +99,9 @@ service cloud.firestore {
           && validTopicId(request.resource.data.topicId)
           && !(request.resource.data.topicId in classData(classId).disabledTopics)
           && request.resource.data.createdAt == request.time
-          && getAfter(claimPath(classId, request.resource.data.topicId)).data.uid == request.auth.uid
-          && getAfter(rosterPath(classId, uid)).data.topicId == request.resource.data.topicId;
+          && getAfter(claimPath(classId, request.resource.data.topicId)).data.claimedAt == request.time
+          && getAfter(rosterPath(classId, uid)).data.topicId == request.resource.data.topicId
+          && getAfter(rosterPath(classId, uid)).data.name == request.resource.data.name;
 
         allow update, delete: if isAdmin();
       }
@@ -105,14 +109,15 @@ service cloud.firestore {
       match /roster/{uid} {
         allow get, list: if isAdmin() || registered(classId);
 
-        allow create: if signedIn()
+        allow create: if googleUser()
           && request.auth.uid == uid
           && request.resource.data.keys().hasOnly(['name', 'topicId'])
           && request.resource.data.name is string
           && request.resource.data.name.size() >= 2
           && request.resource.data.name.size() <= 120
           && validTopicId(request.resource.data.topicId)
-          && getAfter(registrationPath(classId, uid)).data.topicId == request.resource.data.topicId;
+          && getAfter(registrationPath(classId, uid)).data.topicId == request.resource.data.topicId
+          && getAfter(registrationPath(classId, uid)).data.name == request.resource.data.name;
 
         allow update, delete: if isAdmin();
       }

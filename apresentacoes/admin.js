@@ -58,6 +58,7 @@ el("class-select")?.addEventListener("change", event => loadClass(event.target.v
 el("toggle-selection-btn")?.addEventListener("click", () => toggleClassFlag("selectionOpen"));
 el("toggle-evaluation-btn")?.addEventListener("click", () => toggleClassFlag("evaluationOpen"));
 el("save-class-settings-btn")?.addEventListener("click", saveClassSettings);
+el("import-authorized-btn")?.addEventListener("click", importAuthorizedStudents);
 el("create-session-btn")?.addEventListener("click", createSession);
 el("start-btn")?.addEventListener("click", startCurrentPresentation);
 el("end-btn")?.addEventListener("click", endCurrentPhase);
@@ -225,6 +226,7 @@ async function loadClass(classId) {
     if (!snap.exists()) return;
     currentClass = snap.data();
     renderClass();
+    refreshAuthorizedCount();
     attachSession(currentClass.currentSessionId || null);
   });
 
@@ -260,6 +262,163 @@ function renderClass() {
     projector.href = APP_BASE_URL + "projector.html?turma=" + encodeURIComponent(currentClassId);
     show("projector-link", true);
   }
+}
+
+async function refreshAuthorizedCount() {
+  if (!currentClassId) return;
+  try {
+    const snap = await getDocs(collection(db, "classes", currentClassId, "eligible"));
+    el("authorized-count").textContent = String(snap.size);
+  } catch (err) {
+    el("authorized-count").textContent = "—";
+  }
+}
+
+async function importAuthorizedStudents() {
+  clearAdminMessage();
+  if (!currentClassId) {
+    return adminMessage("Selecione primeiro a turma que receberá a lista.", "danger");
+  }
+
+  const input = el("authorized-file");
+  const file = input?.files?.[0];
+  if (!file) {
+    return adminMessage("Selecione o arquivo de alunos copiado do SIGAA.", "danger");
+  }
+
+  const text = await file.text();
+  const expectedCode =
+    currentClassId === "tl1-2026-2-01" ? "T01" :
+    currentClassId === "tl1-2026-2-02" ? "T02" : null;
+
+  if (expectedCode) {
+    const header = text.slice(0, 180).toUpperCase();
+    const otherCode = expectedCode === "T01" ? "T02" : "T01";
+    if (header.includes(otherCode) && !header.includes(expectedCode)) {
+      return adminMessage(
+        "O arquivo parece pertencer à " + otherCode +
+        ", mas a turma selecionada é " + expectedCode + ". Importação cancelada.",
+        "danger"
+      );
+    }
+  }
+
+  let students;
+  try {
+    students = parseAuthorizedFile(text, file.name);
+  } catch (err) {
+    return adminMessage("Não foi possível interpretar a lista: " + err.message, "danger");
+  }
+
+  if (!students.length) {
+    return adminMessage("Nenhum aluno foi encontrado no arquivo.", "danger");
+  }
+
+  const matriculas = new Set();
+  const emails = new Set();
+  for (const student of students) {
+    if (matriculas.has(student.matricula)) {
+      return adminMessage("Há matrícula duplicada no arquivo: " + student.matricula, "danger");
+    }
+    if (emails.has(student.emailNormalized)) {
+      return adminMessage("Há e-mail duplicado no arquivo: " + student.email, "danger");
+    }
+    matriculas.add(student.matricula);
+    emails.add(student.emailNormalized);
+  }
+
+  if (!confirm(
+    "Importar " + students.length + " alunos autorizados para “" +
+    (currentClass?.name || currentClassId) + "”?"
+  )) return;
+
+  try {
+    const prepared = [];
+    for (const student of students) {
+      const eligibilityId = await sha256Hex(
+        student.matricula + "|" + student.emailNormalized
+      );
+      prepared.push({ ...student, eligibilityId });
+    }
+
+    for (let start = 0; start < prepared.length; start += 400) {
+      const batch = writeBatch(db);
+      prepared.slice(start, start + 400).forEach(student => {
+        const ref = doc(
+          db, "classes", currentClassId, "eligible", student.eligibilityId
+        );
+        batch.set(ref, {
+          name: student.name,
+          matricula: student.matricula,
+          email: student.email,
+          emailNormalized: student.emailNormalized,
+          course: student.course || "",
+          status: "active",
+          importedAt: serverTimestamp()
+        }, { merge: true });
+      });
+      await batch.commit();
+    }
+
+    input.value = "";
+    await refreshAuthorizedCount();
+    adminMessage(
+      students.length + " alunos autorizados importados para " +
+      (currentClass?.name || currentClassId) + ".",
+      "ok"
+    );
+  } catch (err) {
+    adminMessage("Falha ao importar a lista: " + err.message, "danger");
+  }
+}
+
+function parseAuthorizedFile(text, filename) {
+  const trimmed = String(text || "").trim();
+
+  if (filename.toLowerCase().endsWith(".json") || trimmed.startsWith("[")) {
+    const data = JSON.parse(trimmed);
+    if (!Array.isArray(data)) throw new Error("O JSON precisa conter uma lista.");
+    return data.map(normalizeAuthorizedStudent).filter(Boolean);
+  }
+
+  const section = trimmed.includes("Discentes (")
+    ? trimmed.split("Discentes (", 2)[1]
+    : trimmed;
+
+  const pattern =
+    /Usuário (?:Off-Line|On-Line) no SIGAA\s+(.+?) \(Perfil\)\s*Curso:\s*(.+?)\s*Matrícula:\s*(\d+)\s*E-mail:\s*([^\s\t]+)/gs;
+
+  const students = [];
+  let match;
+  while ((match = pattern.exec(section)) !== null) {
+    students.push(normalizeAuthorizedStudent({
+      name: match[1],
+      course: match[2],
+      matricula: match[3],
+      email: match[4]
+    }));
+  }
+
+  return students.filter(Boolean);
+}
+
+function normalizeAuthorizedStudent(item) {
+  const name = String(item.name || item.nome || "").trim();
+  const matricula = String(item.matricula || "").replace(/\D/g, "");
+  const email = String(item.email || "").trim();
+  const emailNormalized = email.toLowerCase();
+  const course = String(item.course || item.curso || "").trim();
+
+  if (!name || matricula.length < 5 || !emailNormalized.includes("@")) return null;
+  return { name, matricula, email, emailNormalized, course };
+}
+
+async function sha256Hex(value) {
+  const bytes = new TextEncoder().encode(value);
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(digest))
+    .map(byte => byte.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 function renderRoster() {

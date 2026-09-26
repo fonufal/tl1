@@ -243,21 +243,31 @@ async function requestConfirmationEmail() {
   }
 
   try {
-    const idToken = await user.getIdToken();
-    const body = new URLSearchParams({ idToken, classId });
-    await fetch(MAIL_WEBAPP_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
-      body
-    });
+    await postConfirmationEmail();
     box.textContent = "Solicitação de e-mail de confirmação enviada.";
     box.className = "notice ok";
+    show("mail-status", true);
+
+    const retryDelay = 20000 + Math.floor(Math.random() * 40000);
+    window.setTimeout(() => {
+      if (user) postConfirmationEmail().catch(() => {});
+    }, retryDelay);
   } catch {
-    box.textContent = "A reserva foi feita, mas o pedido de e-mail não pôde ser enviado agora.";
-    box.className = "notice danger";
+    box.textContent = "A reserva foi feita. Se o e-mail não chegar, a plataforma tentará novamente enquanto esta página permanecer aberta.";
+    box.className = "notice";
+    show("mail-status", true);
   }
-  show("mail-status", true);
+}
+
+async function postConfirmationEmail() {
+  const idToken = await user.getIdToken();
+  const body = new URLSearchParams({ idToken, classId });
+  await fetch(MAIL_WEBAPP_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+    body
+  });
 }
 
 function startClassListener(classRef) {

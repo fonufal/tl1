@@ -9,9 +9,6 @@ function doGet() {
 }
 
 function doPost(e) {
-  const lock = LockService.getScriptLock();
-  lock.waitLock(10000);
-
   try {
     const idToken = String(e && e.parameter && e.parameter.idToken || '');
     const classId = String(e && e.parameter && e.parameter.classId || '');
@@ -81,8 +78,6 @@ function doPost(e) {
       logEmail_('', 'TL1 — confirmação de tópico', 'ERRO', String(err && err.message || err));
     } catch (_) {}
     return json_({ ok: false, error: String(err && err.message || err) });
-  } finally {
-    lock.releaseLock();
   }
 }
 

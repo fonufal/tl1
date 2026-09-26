@@ -6,7 +6,7 @@ import {
   getFirestore, doc, getDoc, collection, onSnapshot, runTransaction,
   serverTimestamp, setDoc
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
-import { FIREBASE_CONFIG, MAIL_WEBAPP_URL, isFirebaseConfigured, isMailConfigured } from "./firebase-config.js";
+import { FIREBASE_CONFIG, MAIL_WEBAPP_URL, isFirebaseConfigured, isMailConfigured } from "./runtime-config.js";
 import { TOPICS, TOPIC_MAP } from "./topics.js";
 
 const el = id => document.getElementById(id);

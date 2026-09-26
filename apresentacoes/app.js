@@ -23,6 +23,7 @@ let unsubscribeClaims = null;
 let unsubscribeClass = null;
 let unsubscribeSession = null;
 let activeSession = null;
+let listeningSessionId = null;
 
 function show(id, visible = true) {
   el(id)?.classList.toggle("hidden", !visible);
@@ -120,6 +121,7 @@ async function loadClassAndRegistration() {
   }
 
   startClassListener(classRef);
+  if (registration) await syncSessionFromClass();
 }
 
 function startClaimsListener() {
@@ -218,6 +220,7 @@ async function reserveTopic(topic) {
     show("choice-card", true);
     show("evaluation-card", true);
     renderChoice();
+    await syncSessionFromClass();
     message("Tópico reservado com sucesso.", "ok");
     await requestConfirmationEmail();
   } catch (err) {
@@ -272,38 +275,79 @@ async function postConfirmationEmail() {
 
 function startClassListener(classRef) {
   if (unsubscribeClass) unsubscribeClass();
-  unsubscribeClass = onSnapshot(classRef, snap => {
-    if (!snap.exists()) return;
-    classData = snap.data();
-    if (registration) {
-      handleSessionId(classData.currentSessionId || null);
-    } else {
-      renderTopics();
+  unsubscribeClass = onSnapshot(
+    classRef,
+    async snap => {
+      if (!snap.exists()) return;
+      classData = snap.data();
+      if (registration) {
+        await syncSessionFromClass();
+      } else {
+        renderTopics();
+      }
+    },
+    err => {
+      message("Não foi possível acompanhar as atualizações da turma: " + err.message, "danger");
     }
-  });
+  );
 }
 
-function handleSessionId(sessionId) {
-  if (unsubscribeSession) {
-    unsubscribeSession();
-    unsubscribeSession = null;
-  }
-  activeSession = null;
-  resetEvaluationUI();
+async function syncSessionFromClass() {
+  if (!registration || !classData) return;
 
-  if (!sessionId || !classData?.evaluationOpen) {
-    el("evaluation-status").textContent = classData?.evaluationOpen
+  const sessionId = classData.currentSessionId || null;
+
+  if (!sessionId || !classData.evaluationOpen) {
+    detachSessionListener();
+    resetEvaluationUI();
+    el("evaluation-status").textContent = classData.evaluationOpen
       ? "Aguardando o professor iniciar a sessão."
       : "A avaliação ainda não está aberta.";
     return;
   }
 
+  if (listeningSessionId === sessionId && unsubscribeSession) return;
+
+  detachSessionListener();
+  activeSession = null;
+  resetEvaluationUI();
+
   const sessionRef = doc(db, "classes", classId, "sessions", sessionId);
-  unsubscribeSession = onSnapshot(sessionRef, async snap => {
-    if (!snap.exists()) return;
-    activeSession = { id: snap.id, ...snap.data() };
-    await renderSessionForStudent();
-  });
+
+  // Busca inicial explícita: evita depender apenas do primeiro evento do listener.
+  try {
+    const initial = await getDoc(sessionRef);
+    if (initial.exists()) {
+      activeSession = { id: initial.id, ...initial.data() };
+      await renderSessionForStudent();
+    }
+  } catch (err) {
+    el("evaluation-status").textContent =
+      "Não foi possível carregar a sessão: " + err.message;
+  }
+
+  listeningSessionId = sessionId;
+  unsubscribeSession = onSnapshot(
+    sessionRef,
+    async snap => {
+      if (!snap.exists()) return;
+      activeSession = { id: snap.id, ...snap.data() };
+      await renderSessionForStudent();
+    },
+    err => {
+      listeningSessionId = null;
+      el("evaluation-status").textContent =
+        "Não foi possível acompanhar a sessão: " + err.message;
+      message("Erro ao acompanhar a sessão de apresentações: " + err.message, "danger");
+    }
+  );
+}
+
+function detachSessionListener() {
+  if (unsubscribeSession) unsubscribeSession();
+  unsubscribeSession = null;
+  listeningSessionId = null;
+  activeSession = null;
 }
 
 async function renderSessionForStudent() {
@@ -392,9 +436,27 @@ function resetEvaluationUI() {
 }
 
 function cleanupListeners() {
-  [unsubscribeClaims, unsubscribeClass, unsubscribeSession].forEach(fn => fn && fn());
-  unsubscribeClaims = unsubscribeClass = unsubscribeSession = null;
+  [unsubscribeClaims, unsubscribeClass].forEach(fn => fn && fn());
+  unsubscribeClaims = unsubscribeClass = null;
+  detachSessionListener();
 }
+
+async function refreshClassState() {
+  if (!db || !user || !classId || !registration) return;
+  try {
+    const snap = await getDoc(doc(db, "classes", classId));
+    if (!snap.exists()) return;
+    classData = snap.data();
+    await syncSessionFromClass();
+  } catch (err) {
+    console.warn("Falha ao sincronizar estado da turma", err);
+  }
+}
+
+window.addEventListener("focus", refreshClassState);
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") refreshClassState();
+});
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, ch => ({

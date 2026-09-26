@@ -181,7 +181,7 @@ async function createProductionClasses() {
       term: item.term,
       presentationDate: "",
       active: true,
-      selectionOpen: true,
+      selectionOpen: false,
       evaluationOpen: false,
       presentationSeconds: 180,
       ratingSeconds: 30,

@@ -1,0 +1,154 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function adminPath() {
+      return /databases/$(database)/documents/admins/$(request.auth.uid);
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && exists(adminPath())
+        && get(adminPath()).data.active == true;
+    }
+
+    function classPath(classId) {
+      return /databases/$(database)/documents/classes/$(classId);
+    }
+
+    function registrationPath(classId, uid) {
+      return /databases/$(database)/documents/classes/$(classId)/registrations/$(uid);
+    }
+
+    function rosterPath(classId, uid) {
+      return /databases/$(database)/documents/classes/$(classId)/roster/$(uid);
+    }
+
+    function claimPath(classId, topicId) {
+      return /databases/$(database)/documents/classes/$(classId)/claims/$(topicId);
+    }
+
+    function sessionPath(classId, sessionId) {
+      return /databases/$(database)/documents/classes/$(classId)/sessions/$(sessionId);
+    }
+
+    function classData(classId) {
+      return get(classPath(classId)).data;
+    }
+
+    function registered(classId) {
+      return signedIn() && exists(registrationPath(classId, request.auth.uid));
+    }
+
+    function validTopicId(topicId) {
+      return topicId.matches('^T(0[1-9]|[1-4][0-9]|5[01])$');
+    }
+
+    match /admins/{uid} {
+      allow get: if signedIn() && request.auth.uid == uid;
+      allow list, create, update, delete: if isAdmin();
+    }
+
+    match /classes/{classId} {
+      allow get: if signedIn();
+      allow list: if isAdmin();
+      allow create, update, delete: if isAdmin();
+
+      match /claims/{topicId} {
+        allow get, list: if signedIn();
+
+        allow create: if signedIn()
+          && request.auth.token.email_verified == true
+          && classData(classId).selectionOpen == true
+          && validTopicId(topicId)
+          && !(topicId in classData(classId).disabledTopics)
+          && request.resource.data.keys().hasOnly(['uid', 'claimedAt'])
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.claimedAt == request.time
+          && getAfter(registrationPath(classId, request.auth.uid)).data.topicId == topicId;
+
+        allow update, delete: if isAdmin();
+      }
+
+      match /registrations/{uid} {
+        allow get: if isAdmin() || (signedIn() && request.auth.uid == uid);
+        allow list: if isAdmin();
+
+        allow create: if signedIn()
+          && request.auth.uid == uid
+          && request.auth.token.email_verified == true
+          && classData(classId).selectionOpen == true
+          && request.resource.data.keys().hasOnly([
+            'uid', 'name', 'matricula', 'email', 'topicId', 'createdAt'
+          ])
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.email == request.auth.token.email
+          && request.resource.data.name is string
+          && request.resource.data.name.size() >= 2
+          && request.resource.data.name.size() <= 120
+          && request.resource.data.matricula is string
+          && request.resource.data.matricula.size() >= 3
+          && request.resource.data.matricula.size() <= 40
+          && validTopicId(request.resource.data.topicId)
+          && !(request.resource.data.topicId in classData(classId).disabledTopics)
+          && request.resource.data.createdAt == request.time
+          && getAfter(claimPath(classId, request.resource.data.topicId)).data.uid == request.auth.uid
+          && getAfter(rosterPath(classId, uid)).data.topicId == request.resource.data.topicId;
+
+        allow update, delete: if isAdmin();
+      }
+
+      match /roster/{uid} {
+        allow get, list: if isAdmin() || registered(classId);
+
+        allow create: if signedIn()
+          && request.auth.uid == uid
+          && request.resource.data.keys().hasOnly(['name', 'topicId'])
+          && request.resource.data.name is string
+          && request.resource.data.name.size() >= 2
+          && request.resource.data.name.size() <= 120
+          && validTopicId(request.resource.data.topicId)
+          && getAfter(registrationPath(classId, uid)).data.topicId == request.resource.data.topicId;
+
+        allow update, delete: if isAdmin();
+      }
+
+      match /sessions/{sessionId} {
+        allow get: if isAdmin() || registered(classId);
+        allow list: if isAdmin();
+        allow create, update, delete: if isAdmin();
+
+        match /evaluations/{evaluationId} {
+          allow get: if isAdmin()
+            || (signedIn() && resource.data.evaluatorUid == request.auth.uid);
+          allow list: if isAdmin();
+
+          allow create: if registered(classId)
+            && classData(classId).evaluationOpen == true
+            && get(sessionPath(classId, sessionId)).data.status == 'rating'
+            && get(sessionPath(classId, sessionId)).data.currentPresenter.uid
+              == request.resource.data.presenterUid
+            && request.resource.data.presenterUid != request.auth.uid
+            && request.resource.data.evaluatorUid == request.auth.uid
+            && evaluationId
+              == request.resource.data.presenterUid + '__' + request.auth.uid
+            && request.resource.data.roundId
+              == get(sessionPath(classId, sessionId)).data.roundId
+            && request.resource.data.score is number
+            && request.resource.data.score >= 0
+            && request.resource.data.score <= 10
+            && request.resource.data.submittedAt == request.time
+            && request.resource.data.keys().hasOnly([
+              'presenterUid', 'evaluatorUid', 'score', 'roundId', 'submittedAt'
+            ]);
+
+          allow update, delete: if isAdmin();
+        }
+      }
+    }
+  }
+}

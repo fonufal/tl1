@@ -6,7 +6,7 @@ import {
   getFirestore, doc, getDoc, getDocs, collection, setDoc, updateDoc,
   onSnapshot, serverTimestamp, writeBatch
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
-import { FIREBASE_CONFIG, APP_BASE_URL, isFirebaseConfigured } from "./runtime-config.js";
+import { FIREBASE_CONFIG, APP_BASE_URL, isFirebaseConfigured } from "./runtime-config.js?v=20260926-1737";
 import { TOPIC_MAP } from "./topics.js";
 
 const el = id => document.getElementById(id);

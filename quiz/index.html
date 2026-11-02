@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#141517">
+  <meta name="description" content="Quiz ao vivo e prática de conceitos de Teoria Linguística 1 — FALE/UFAL.">
+  <title>Em questão — Teoria Linguística 1</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script defer src="./questions.js"></script>
+  <script defer src="./app.js"></script>
+</head>
+<body>
+  <a class="skip" href="#app">Ir para o conteúdo</a>
+  <header class="top">
+    <a class="brand" href="./" aria-label="Em questão, página inicial"><span class="brand-symbol" aria-hidden="true">?</span><span class="brand-name">EM <strong>QUESTÃO</strong><small>TEORIA LINGUÍSTICA 1 · FALE/UFAL</small></span></a>
+    <a class="portal" href="../portal/">Portal da disciplina <span aria-hidden="true">↗</span></a>
+  </header>
+  <main id="app" tabindex="-1" aria-live="polite"></main>
+  <footer class="foot"><span>TL1 / LETP239</span><span>Atividade formativa. Não substitui avaliações ou registros do SIGAA.</span></footer>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

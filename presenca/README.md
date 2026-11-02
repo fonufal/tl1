@@ -27,6 +27,7 @@ O PDF disponibilizado pelo docente em 02/11/2026 mostra a interface web de plani
 O sistema gera:
 - grade CSV em UTF-8, separada por ponto e vírgula;
 - tabela TSV no clipboard para colar em planilha privada;
+- botão Copiar só as faltas: resumo de exceções de encontros concluídos, com matrícula, nome e faltas em cada bloco. No SIGAA, o fluxo de menor esforço tende a ser indicar as presenças da data no cabeçalho e ajustar apenas essas exceções; o funcionamento exato dos cliques deve ser conferido na interface institucional;
 - um valor por encontro completo: 0, 2 ou 4 **faltas**. Dias com apenas uma chamada continuam PENDENTE, não são convertidos automaticamente em falta; T depende do estado atual na lista autorizada.
 
 Antes de lançar no SIGAA, conferir o calendário acadêmico, trancamentos, matrículas tardias, feriados, aulas canceladas e substituições. O SIGAA permanece o registro acadêmico oficial.

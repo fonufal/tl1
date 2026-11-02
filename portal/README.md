@@ -1,16 +1,16 @@
 # Portal TL1 — estudos de estrutura e design
 
-Este diretório contém propostas **exploratórias**, não uma homepage definitiva. O procedimento segue o documento do Google Drive **“01_PROTOCOLO_MESTRE — Identidades gráficas e websites”** (v1.0, setembro de 2026) e o escopo do Portal TL1 na pasta `05_Portal_e_Ferramentas/00_Portal_TL1`.
+A **direção 01 — Índice editorial** foi escolhida para aprofundamento em 2 de novembro de 2026. A homepage foi revisada, mas ainda precisa de aprovação final antes de derivar páginas internas. As direções 02 e 03 permanecem como referências exploratórias. O procedimento segue o documento do Google Drive **“01_PROTOCOLO_MESTRE — Identidades gráficas e websites”** (v1.0, setembro de 2026) e o escopo do Portal TL1 na pasta `05_Portal_e_Ferramentas/00_Portal_TL1`.
 
 ## Estratégia de implantação
 
-A página de origem do repositório (`/tl1/`) continua pertencendo à ferramenta **Teoria em Voz Alta**. O Portal TL1 foi criado na rota independente `/tl1/portal/`, preservando as ferramentas existentes e seus URLs. As propostas são comparáveis em links acessíveis por teclado:
+A página de origem do repositório (`/tl1/`) continua pertencendo à ferramenta **Teoria em Voz Alta**. O Portal TL1 foi criado na rota independente `/tl1/portal/`, preservando as ferramentas existentes e seus URLs. As três propostas permanecem em arquivos separados; a barra de comparação foi retirada da homepage escolhida para não competir com a navegação do estudante:
 
 - `index.html` + `styles.css` — **Índice editorial**: índice numerado, grandes escalas tipográficas, navegação aberta e módulos apresentados em linhas.
 - `alternativas/caderno.html` — **Caderno de estudos**: editorial de leitura, navegação lateral e organização por capítulos.
 - `alternativas/percurso.html` — **Percurso de aula**: organização por movimentos de aprendizagem, ordem de ações e amplas faixas cromáticas.
 
-Estas três direções são distintas em arquitetura, hierarquia, paleta e navegação. A publicação **não implica aprovação** do Gate 1/2; cabe validar a direção antes de consolidar páginas internas.
+As três direções diferem em arquitetura, hierarquia, paleta e navegação. A direção 01 foi selecionada, mas sua versão revisada ainda está sujeita à validação visual final. Nenhuma ferramenta existente foi alterada.
 
 ## Fonte de informação
 
@@ -33,4 +33,16 @@ Validar viewport desktop e mobile, ordem de tabulação, navegação por âncora
 
 ## Próxima etapa
 
-Escolher e validar uma direção. Só depois derivar outras páginas, carregar links de materiais e configurar dados específicos da turma atual.
+Validar a versão revisada da homepage editorial em desktop e mobile. Só depois derivar páginas internas, carregar links de materiais e configurar dados específicos da turma atual.
+
+## Revisão visual da direção 01 — 2 de novembro de 2026
+
+- O cabeçalho identifica imediatamente a disciplina e seus três destinos principais, sem barra de comparação entre propostas.
+- A abertura foi encurtada e inclui dois atalhos diretos para as ferramentas existentes.
+- A seção Ferramentas antecede a área Estudar, ainda não preenchida com materiais canônicos.
+- O sistema mantém composição editorial, serifada expressiva, sem serifa para leitura, paleta creme/verde/terracota, numeração e filetes.
+- O mobile recebeu cabeçalho e navegação específicos: três destinos de 48 px de altura, colunas reordenadas, tipografia adaptada e estados de módulos preservados.
+- Testes locais com capturas nos viewports 320, 390, 768, 1024 e 1440 px: não houve transbordamento horizontal; os dois únicos links de ferramentas apontam para os endereços já existentes; os módulos futuros permanecem não clicáveis.
+- A conferência em navegador local usou fontes de reserva porque a execução de rede foi bloqueada. A avaliação final com as fontes web carregadas, além de teste completo com leitores de tela, segue pendente.
+
+**Fontes de referência para decisões:** protocolo mestre de identidades gráficas e websites (Drive) e documento de escopo do Portal TL1. Não usar esta revisão para modificar os sites do Teoria em Voz Alta ou das Apresentações.

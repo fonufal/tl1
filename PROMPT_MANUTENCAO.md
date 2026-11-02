@@ -303,6 +303,36 @@ Antes de alterar:
 
 Não recrie a plataforma como parte do portal se um link e uma integração leve forem suficientes.
 
+### 14.1. Quiz interativo
+
+O Portal TL1 deve prever um módulo independente de quiz ao vivo, semelhante em finalidade ao Kahoot!, ainda a desenvolver. Requisitos iniciais:
+
+- banco permanente de questões conceitualmente validadas, associado aos conteúdos e às leituras da disciplina;
+- sessões identificadas por turma e semestre, iniciadas pelo docente, com ingresso por código ou QR Code;
+- projeção das questões, resposta no celular, temporização configurável e apresentação de resultados agregados;
+- modalidades ao vivo e de prática individual, quando úteis;
+- pontuação e classificação opcionais; resultados formativos não são notas oficiais;
+- navegação acessível, possibilidade de participação alternativa e tratamento mínimo de dados pessoais.
+
+Não apresente esse módulo como já publicado antes de implementá-lo e testá-lo.
+
+### 14.2. Registro de presença por QR Code
+
+O Portal TL1 deve prever uma ferramenta independente de chamada por QR Code, ainda a desenvolver. Para encontros com quatro tempos, o modelo solicitado utiliza dois registros por data e turma: início do encontro para as duas primeiras aulas e final do encontro para as duas últimas. A atribuição dos tempos deve ser verificável e admitir ajustes documentados para casos particulares.
+
+- cada janela de chamada deve ser iniciada pelo professor e usar QR Code distinto, com expiração e validação no servidor;
+- o estudante deve autenticar-se e estar autorizado para a turma segundo a lista institucional; impedir registros duplicados;
+- registrar início e fim separadamente, com horário e estado da conferência, sem transformar um único escaneamento em prova absoluta de presença física;
+- disponibilizar alternativa acessível a quem não dispõe de celular ou conexão e correção administrativa registrada;
+- fornecer consulta e exportação privadas, por turma e semestre, para conferência e lançamento no SIGAA;
+- não publicar listas, matrículas, históricos individuais ou dados de frequência em páginas abertas; respeitar as normas institucionais e a LGPD.
+
+O **SIGAA permanece a fonte oficial para frequência**. O módulo auxilia o registro em sala e a conferência, sem substituí-lo. Reaproveitar componentes de identidade e gestão de turmas da plataforma de apresentações apenas após verificar regras de acesso, segregação de dados e compatibilidade; não presumir que os controles atuais atendem automaticamente a esses requisitos.
+
+### 14.3. Organização do portal e dos módulos
+
+O Portal TL1 integra quatro ferramentas: Teoria em Voz Alta e Apresentações (existentes), Quiz interativo e Registro de presença por QR Code (planejadas). Cada ferramenta permanece como módulo próprio, conectado por uma navegação comum. Não remover nem redirecionar endereços publicados sem um plano de compatibilidade e verificação. Questões, roteiros, modelos e componentes reutilizáveis pertencem à estrutura permanente; sessões de quiz, chamadas e dados de turma pertencem a cada oferta semestral.
+
 ## 15. Melhoria contínua
 
 Use a disciplina também como espaço de inovação pedagógica controlada.

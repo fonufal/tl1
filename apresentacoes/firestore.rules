@@ -329,6 +329,56 @@ service cloud.firestore {
         }
       }
 
+      // Chamada por QR: autorização institucional, token secreto e horário do servidor.
+      function attendanceWindowPath(classId, windowId) {
+        return /databases/$(database)/documents/classes/$(classId)/attendanceWindows/$(windowId);
+      }
+      function attendanceEligibilityId(classId) {
+        return registered(classId)
+          ? get(registrationPath(classId, request.auth.uid)).data.eligibilityId
+          : get(quizIdentityPath(classId, request.auth.uid)).data.eligibilityId;
+      }
+      function attendanceMember(classId) {
+        return googleUser()
+          && request.auth.token.email is string
+          && request.auth.token.email.lower().matches('^[^@]+@([a-z0-9-]+[.])*ufal[.]br$')
+          && (registered(classId) || exists(quizIdentityPath(classId, request.auth.uid)))
+          && get(eligiblePath(classId, attendanceEligibilityId(classId))).data.status == 'active'
+          && get(eligiblePath(classId, attendanceEligibilityId(classId))).data.emailNormalized
+            == request.auth.token.email.lower();
+      }
+      match /attendanceWindows/{windowId} {
+        allow get, list, create, update: if isAdmin();
+        allow delete: if false;
+        match /marks/{uid} {
+          allow get: if isAdmin() || (googleUser() && request.auth.uid == uid);
+          allow list: if isAdmin();
+          allow create: if attendanceMember(classId)
+            && uid == request.auth.uid
+            && windowId.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}_(start|end)$')
+            && exists(attendanceWindowPath(classId, windowId))
+            && get(attendanceWindowPath(classId, windowId)).data.status == 'open'
+            && request.time >= get(attendanceWindowPath(classId, windowId)).data.openedAt
+            && request.time < get(attendanceWindowPath(classId, windowId)).data.expiresAt
+            && request.resource.data.keys().hasOnly(['uid', 'eligibilityId', 'token', 'markedAt'])
+            && request.resource.data.uid == uid
+            && request.resource.data.eligibilityId == attendanceEligibilityId(classId)
+            && request.resource.data.token is string
+            && request.resource.data.token.size() == 48
+            && request.resource.data.token == get(attendanceWindowPath(classId, windowId)).data.token
+            && request.resource.data.markedAt == request.time;
+          allow update, delete: if false;
+        }
+        match /corrections/{eligibilityId} {
+          allow get, list, create, update: if isAdmin();
+          allow delete: if false;
+        }
+        match /correctionLogs/{logId} {
+          allow get, list, create: if isAdmin();
+          allow update, delete: if false;
+        }
+      }
+
     }
   }
 }

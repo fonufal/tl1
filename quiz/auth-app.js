@@ -4,7 +4,8 @@ import {getFirestore,doc,collection,getDoc,getDocs,setDoc,updateDoc,onSnapshot,s
   runTransaction,writeBatch,Timestamp} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 import {FIREBASE_CONFIG} from "../apresentacoes/firebase-config.js";
 
-const firebase=initializeApp(FIREBASE_CONFIG,"tl1-quiz-auth");
+const firebase=initializeApp(FIREBASE_CONFIG);
+// Mesmo Firebase App [DEFAULT] e mesma origem para reutilizar persistência do login.
 const auth=getAuth(firebase),db=getFirestore(firebase);
 const app=document.getElementById("app"),toast=document.getElementById("toast");
 const Q=window.TL1_QUIZ_QUESTIONS||[],UNITS=window.TL1_QUIZ_UNITS||[];

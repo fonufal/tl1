@@ -59,7 +59,7 @@ function renderAdmin(){
     html+='</section>';
   }
   html+='</div><section class="card"><h2>Conferência e ajustes</h2><p class="muted small">A correção manual exige justificativa. Cada alteração gera um evento de auditoria. O QR Code não substitui a conferência do professor.</p><form id="correction" class="stack"><div class="grid"><div class="field"><label for="student">Estudante</label><select id="student" required>'+state.roster.filter(x=>x.status==="active").map(s=>'<option value="'+esc(s.id)+'">'+esc(s.name)+" · "+esc(s.matricula)+'</option>').join("")+'</select></div><div class="field"><label for="stage">Etapa</label><select id="stage"><option value="start">Início (2 tempos)</option><option value="end">Final (2 tempos)</option></select></div></div><div class="grid"><div class="field"><label for="correction-status">Registrar</label><select id="correction-status"><option value="present">Presença conferida</option><option value="absent">Ausência conferida</option><option value="auto">Desfazer correção (usar QR)</option></select></div><div class="field"><label for="reason">Justificativa</label><input id="reason" minlength="8" required placeholder="Ex.: registro presencial sem celular"></div></div><button type="submit" class="btn secondary">Salvar correção</button></form></section>';
-  html+='<section class="card"><div class="row"><div><h2>Relatório de frequência</h2><p class="muted small">0, 2 ou 4 = faltas na data. Pendente = nem todas as janelas foram abertas. A grade considera apenas registros existentes, sem presumir aulas em dias não registrados.</p></div><button class="btn secondary" data-act="report">Atualizar relatório</button></div><div class="actionbar"><button class="btn" data-act="copy">Copiar grade</button><button class="btn secondary" data-act="csv">Baixar CSV</button></div><div id="report-table">'+buildTable()+'</div></section>';
+  html+='<section class="card"><div class="row"><div><h2>Relatório de frequência</h2><p class="muted small">0, 2 ou 4 = faltas na data. Pendente = nem todas as janelas foram abertas. A grade considera apenas registros existentes, sem presumir aulas em dias não registrados.</p></div><button class="btn secondary" data-act="report">Atualizar relatório</button></div><div class="actionbar"><button class="btn" data-act="copy">Copiar grade</button><button class="btn secondary" data-act="csv">Baixar CSV</button><button class="btn secondary" data-act="copyabsences">Copiar só as faltas</button></div><div id="report-table">'+buildTable()+'</div></section>';
   app.innerHTML=html+errBox();
   for(const stage of ["start","end"]){const w=state.windows.find(x=>x.id===windowId(state.selectedDate,stage));if(w&&w.status==="open"&&w.expiresAt?.toMillis()>Date.now()&&window.QRCode){
     new window.QRCode($("qr-"+stage),{text:makeLink(w),width:200,height:200,correctLevel:window.QRCode.CorrectLevel.M});
@@ -98,11 +98,12 @@ async function verify(){
       tx.set(cr,{uid:state.user.uid,createdAt:serverTimestamp()});
     });
     await identify();if(!state.member)throw Error("Não foi possível concluir o vínculo.");
+    state.busy=false;
     await mark();
   }finally{state.busy=false;}
 }
 async function mark(){
-  if(state.busy&&state.needVerify)return;
+  if(state.busy)return;
   if(!institutional(state.user?.email)||!state.member)throw Error("Acesso não autorizado para registrar frequência.");
   const ref=doc(winRef(state.date,state.stage),"marks",state.user.uid),old=await getDoc(ref);
   if(old.exists()){showSuccess("Presença já registrada nesta etapa.");return;}
@@ -135,6 +136,15 @@ async function refreshRecords(){
   }));
   state.records=new Map(values);
 }
+
+function absenceSummary(){
+  const rows=absenceRows();
+  return '<h3 style="margin-top:24px">Faltas para ajuste no SIGAA</h3><p class="muted small">Após conferir as presenças da data no SIGAA, ajuste apenas os casos abaixo. Não inclui janelas incompletas.</p>'+
+  (rows.length===1?'<p>Nenhuma falta em encontros encerrados.</p>':
+  '<div class="tablewrap"><table><thead><tr>'+rows[0].map(x=>'<th>'+esc(x)+'</th>').join("")+'</tr></thead><tbody>'+
+  rows.slice(1).map(r=>'<tr>'+r.map(x=>'<td>'+esc(x)+'</td>').join("")+'</tr>').join("")+'</tbody></table></div>');
+}
+
 function markStatus(student,windowDoc){
   if(!windowDoc)return null;
   const x=state.records.get(windowDoc.id),override=x?.corrections.get(student.id);
@@ -158,10 +168,25 @@ function matrix(){
   });
   return [["Matrícula","Nome",...days.map(x=>x.slice(8,10)+"/"+x.slice(5,7)+"/"+x.slice(0,4)),"Faltas (datas completas)"],...rows];
 }
+function absenceRows(){
+  const days=[...new Set(state.windows.map(w=>w.day))].sort(),result=[];
+  for(const day of days){
+    const first=state.windows.find(w=>w.day===day&&w.stage==="start"),last=state.windows.find(w=>w.day===day&&w.stage==="end");
+    if(!first||!last)continue;
+    const done=w=>w.status==="closed"||(w.expiresAt&&w.expiresAt.toMillis()<=Date.now());
+    if(!done(first)||!done(last))continue;
+    for(const s of state.roster){
+      if(s.status!=="active")continue;
+      const a=markStatus(s,first)?0:2,b=markStatus(s,last)?0:2;
+      if(a||b)result.push([day.slice(8,10)+"/"+day.slice(5,7)+"/"+day.slice(0,4),s.matricula,s.name,String(a),String(b),String(a+b)]);
+    }
+  }
+  return [["Data","Matrícula","Nome","Faltas no início","Faltas no final","Total"],...result];
+}
 function buildTable(){
   if(!state.roster.length)return '<p class="muted">Sem estudantes autorizados nesta turma.</p>';
   const m=matrix(),hdr=m[0].map(x=>'<th>'+esc(x)+'</th>').join("");
-  return '<div class="tablewrap"><table><thead><tr>'+hdr+'</tr></thead><tbody>'+m.slice(1).map(r=>'<tr>'+r.map((v,i)=>'<td '+(i>1?'class="num"':'')+'>'+esc(v)+'</td>').join("")+'</tr>').join("")+'</tbody></table></div>';
+  return '<div class="tablewrap"><table><thead><tr>'+hdr+'</tr></thead><tbody>'+m.slice(1).map(r=>'<tr>'+r.map((v,i)=>'<td '+(i>1?'class="num"':'')+'>'+esc(v)+'</td>').join("")+'</tr>').join("")+'</tbody></table></div>'+absenceSummary();
 }
 async function openWindow(stage){
   if($("turma").value!==state.classId)throw Error("Clique em Consultar após trocar a turma.");
@@ -189,6 +214,7 @@ async function correction(){
 }
 function safeCell(x){const v=String(x);return /^[=+\-@]/.test(v)?"'"+v:v}
 function downloadCSV(){const cells=matrix();const csv="\ufeff"+cells.map(r=>r.map(x=>'"'+safeCell(x).replaceAll('"','""')+'"').join(";")).join("\r\n");const url=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));const a=document.createElement("a");a.href=url;a.download="presenca-"+state.classId+"-"+today()+".csv";a.click();setTimeout(()=>URL.revokeObjectURL(url),1500)}
+async function copyAbsences(){await navigator.clipboard.writeText(absenceRows().map(r=>r.map(x=>safeCell(x).replace(/[\t\r\n]/g," ")).join("\t")).join("\n"));notify("Somente as faltas confirmadas foram copiadas.");}
 async function copyTSV(){await navigator.clipboard.writeText(matrix().map(r=>r.map(x=>safeCell(x).replace(/[\t\r\n]/g," ")).join("\t")).join("\n"));notify("Grade copiada. Cole em uma planilha privada para conferência.")}
 app.addEventListener("click",async e=>{
   const b=e.target.closest("[data-act]");if(!b)return;
@@ -205,6 +231,7 @@ app.addEventListener("click",async e=>{
     if(act==="copylink"){const w=state.windows.find(x=>x.id===windowId(state.selectedDate,stage));if(w){await navigator.clipboard.writeText(makeLink(w));notify("Link temporário copiado.")}}
     if(act==="report"){await refreshRecords();render();notify("Relatório atualizado.")}
     if(act==="copy")await copyTSV();
+    if(act==="copyabsences")await copyAbsences();
     if(act==="csv")downloadCSV();
   }catch(error){err(error)}
 });

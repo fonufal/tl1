@@ -302,7 +302,9 @@ service cloud.firestore {
 
         match /answers/{answerId} {
           allow get: if isAdmin() || (
-            googleUser() && resource.data.uid == request.auth.uid
+            googleUser()
+            && answerId == get(quizSessionPath(classId, pin)).data.roundId
+              + '__' + request.auth.uid
           );
           allow list, update, delete: if isAdmin();
           allow create: if quizMember(classId)

@@ -305,7 +305,7 @@ Não recrie a plataforma como parte do portal se um link e uma integração leve
 
 ### 14.1. Quiz interativo
 
-O Portal TL1 deve prever um módulo independente de quiz ao vivo, semelhante em finalidade ao Kahoot!, ainda a desenvolver. Requisitos iniciais:
+O Portal TL1 inclui um módulo independente **Em questão**, com protótipo público sem cadastro e nova implementação de autenticação compartilhada em homologação (`quiz/auth-preview.html`). O quiz com login utiliza o mesmo projeto Firebase e a mesma sessão Google do módulo Apresentações, mas suas coleções e regras de acesso são independentes. Requisitos permanentes:
 
 - banco permanente de questões conceitualmente validadas, associado aos conteúdos e às leituras da disciplina;
 - sessões identificadas por turma e semestre, iniciadas pelo docente, com ingresso por código ou QR Code;
@@ -314,7 +314,7 @@ O Portal TL1 deve prever um módulo independente de quiz ao vivo, semelhante em 
 - pontuação e classificação opcionais; resultados formativos não são notas oficiais;
 - navegação acessível, possibilidade de participação alternativa e tratamento mínimo de dados pessoais.
 
-Não apresente esse módulo como já publicado antes de implementá-lo e testá-lo.
+Não confundir arquivos publicados no GitHub Pages com uma implantação validada do backend: o acesso integrado depende de implantação do arquivo **combinado** `apresentacoes/firestore.rules` e testes reais de permissão, conexão e acessibilidade. Preserve a versão anterior do quiz até a homologação. Estudantes já identificados em Apresentações entram sem novo cadastro; estudantes elegíveis sem reserva de tópico fazem uma confirmação única, independente da atividade de apresentações. Não exigir login na prática individual. Registros identificados pertencem a cada semestre/turma, não ao banco permanente de questões.
 
 ### 14.2. Registro de presença por QR Code
 

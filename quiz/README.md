@@ -41,3 +41,44 @@ Módulo independente de quiz formativo de TL1 (FALE/UFAL), publicado no GitHub P
 - \`styles.css\`: estilos responsivos.
 - \`questions.js\`: banco permanente de questões.
 - \`app.js\`: sessões, comunicação, temporização, apuração, exportação, prática e editor.
+
+
+## Acesso integrado com Apresentações — versão de homologação (02/11/2026)
+
+Esta segunda implementação está disponível como **código piloto** em \`auth-preview.html\` e \`auth-app.js\`, sem substituir o quiz PeerJS ativo em \`index.html\`. A nova versão usa o mesmo Firebase Project, a mesma aplicação padrão do Firebase Authentication e a mesma origem GitHub Pages do módulo Apresentações; assim, a sessão Google existente é reutilizada no mesmo navegador, desde que continue válida. A prática individual pública do quiz original permanece acessível sem autenticação.
+
+**Não liberar como ferramenta principal antes da publicação das regras de segurança e dos testes com contas reais.** Alterar os arquivos do GitHub não publica regras no Firebase.
+
+### Modelo de identificação
+
+1. Login Google: usa a mesma sessão local persistente de Apresentações; não solicita novo cadastro.
+2. Se há \`classes/{classId}/registrations/{uid}\`, considera o estudante identificado e autorizado naquela turma, sem novo formulário.
+3. Se não há registro de apresentação, procura \`classes/{classId}/quizIdentities/{uid}\`.
+4. Se ainda não existe vínculo, solicita **uma única vez** matrícula e e-mail SIGAA e os confronta com \`classes/{classId}/eligible/{sha256(matricula + "|" + email)}\`.
+5. A transação cria \`quizIdentities/{uid}\` e \`quizClaims/{eligibilityId}\`, com verificação atômica por regras do Firestore. Isso não reserva tema nem modifica os dados administrativos de Apresentações.
+6. A regra do módulo Apresentações ganhou uma verificação adicional que rejeita reserva por UID diverso daquele já vinculado ao quiz; preservar esta consistência nos próximos semestres.
+
+O mecanismo de matrícula + e-mail segue a opção já usada em Apresentações. **Não comprova sozinho titularidade de e-mail**, portanto não deve ser usado para decisões de avaliação oficial ou outros procedimentos de alto impacto sem um segundo fator/validação institucional.
+
+### Estrutura dos quizzes (Firestore)
+
+- \`classes/{classId}/quizSessions/{pin}\`: sessão, pergunta corrente, janela de tempo, resultado agregado e quadro de classificação por identificadores não nominais.
+- \`.../participants/{uid}\`: nome associado à conta e à turma. Leitura do próprio estudante e do professor; **não listado a colegas**.
+- \`.../answers/{roundId}__{uid}\`: uma resposta por estudante e rodada, com timestamp confirmado pelo servidor; leitura do estudante titular e do professor.
+- \`.../rounds/{roundId}\`: histórico e estatísticas por pergunta, leitura apenas de administradores.
+- \`classes/{classId}/quizIdentities/{uid}\` e \`quizClaims/{eligibilityId}\`: vínculo exclusivo com turma; sem duplicar matrícula ou e-mail em documentos do quiz.
+
+As regras novas foram acrescentadas **integralmente** às regras existentes em \`apresentacoes/firestore.rules\`, sem criar um segundo arquivo de regras que pudesse sobrescrever indevidamente as permissões da plataforma de apresentações.
+
+### Publicação e testes pendentes
+
+1. Validar a sintaxe e as permissões do arquivo combinado \`apresentacoes/firestore.rules\` com o Firebase Emulator Suite, incluindo cenário autorizado e tentativas de leitura/listagem de dados de outros estudantes, respostas duplicadas e respostas enviadas após o prazo.
+2. Fazer backup das regras atuais do console e implantar **o arquivo combinado inteiro** no projeto Firebase \`tl1-apresentacoes\`, não só o trecho do quiz. Antes da implantação, comparar o conteúdo do console com a versão corrente do GitHub e resolver eventuais alterações que só existam no console.
+3. Abrir \`https://fonufal.github.io/tl1/quiz/auth-preview.html\` com o professor (admin Firebase), criar sala e escanear o QR em um celular de estudante previamente registrado em Apresentações. Confirmar entrada sem segundo login e sem digitar matrícula.
+4. Testar outro estudante elegível ainda sem reserva de tópico: um único vínculo matrícula/e-mail, sem criar reserva em Apresentações. Verificar que depois ele consegue reservar um tema normalmente.
+5. Testar conta não autorizada, matrícula já vinculada a outra conta, resposta repetida, resposta após o prazo e leitura proibida de respostas e nomes dos colegas.
+6. Conferir relatório agregado e individual (este último **contém nomes/UIDs e deve ser guardado em pasta privada do semestre**), pontuação, acessibilidade e estabilidade com estudantes usando Wi-Fi e dados móveis.
+7. Com todos os testes aprovados, trocar o arquivo principal \`quiz/index.html\` para a implementação integrada; retirar dependências PeerJS da página principal. Manter um caminho de reversão.
+
+As regras do projeto do Firebase não podem ser implantadas automaticamente pela mera alteração deste repositório. Enquanto não forem implantadas, a versão integrada pode mostrar \`Missing or insufficient permissions\`, comportamento esperado nesta etapa.
+

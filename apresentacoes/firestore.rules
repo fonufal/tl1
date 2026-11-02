@@ -58,6 +58,35 @@ service cloud.firestore {
       return topicId.matches('^T(0[1-9]|[1-4][0-9]|5[01])$');
     }
 
+
+    // Identidade comum entre Apresentações e Quiz (sem exigir reserva de tópico).
+    function quizIdentityPath(classId, uid) {
+      return /databases/$(database)/documents/classes/$(classId)/quizIdentities/$(uid);
+    }
+
+    function quizClaimPath(classId, eligibilityId) {
+      return /databases/$(database)/documents/classes/$(classId)/quizClaims/$(eligibilityId);
+    }
+
+    function quizSessionPath(classId, pin) {
+      return /databases/$(database)/documents/classes/$(classId)/quizSessions/$(pin);
+    }
+
+    function quizParticipantPath(classId, pin, uid) {
+      return /databases/$(database)/documents/classes/$(classId)/quizSessions/$(pin)/participants/$(uid);
+    }
+
+    function quizMember(classId) {
+      return googleUser()
+        && (registered(classId) || exists(quizIdentityPath(classId, request.auth.uid)));
+    }
+
+    function quizName(classId) {
+      return registered(classId)
+        ? get(registrationPath(classId, request.auth.uid)).data.name
+        : get(quizIdentityPath(classId, request.auth.uid)).data.name;
+    }
+
     match /admins/{uid} {
       allow get: if signedIn() && request.auth.uid == uid;
       allow list, create, update, delete: if isAdmin();
@@ -89,6 +118,8 @@ service cloud.firestore {
             && request.resource.data.status == resource.data.status
             && request.resource.data.importedAt == resource.data.importedAt
             && request.resource.data.status == 'active'
+            && (!exists(quizClaimPath(classId, eligibilityId))
+              || get(quizClaimPath(classId, eligibilityId)).data.uid == request.auth.uid)
             && request.resource.data.boundUid == request.auth.uid
             && request.resource.data.boundAuthEmail == request.auth.token.email
             && validTopicId(request.resource.data.topicId)
@@ -211,5 +242,91 @@ service cloud.firestore {
         }
       }
     }
+
+      // A identificação para o Quiz é independente da reserva de tópicos.
+      match /quizIdentities/{uid} {
+        allow get: if isAdmin() || (googleUser() && request.auth.uid == uid);
+        allow list, update, delete: if isAdmin();
+        allow create: if googleUser()
+          && request.auth.uid == uid
+          && !registered(classId)
+          && request.resource.data.keys().hasOnly(['eligibilityId', 'name', 'createdAt'])
+          && request.resource.data.eligibilityId is string
+          && request.resource.data.eligibilityId.matches('^[0-9a-f]{64}$')
+          && request.resource.data.name is string
+          && request.resource.data.name.size() >= 2
+          && request.resource.data.name.size() <= 120
+          && request.resource.data.createdAt == request.time
+          && get(eligiblePath(classId, request.resource.data.eligibilityId)).data.status == 'active'
+          && get(eligiblePath(classId, request.resource.data.eligibilityId)).data.name == request.resource.data.name
+          && (
+            !('boundUid' in get(eligiblePath(classId, request.resource.data.eligibilityId)).data)
+            || get(eligiblePath(classId, request.resource.data.eligibilityId)).data.boundUid == ''
+            || get(eligiblePath(classId, request.resource.data.eligibilityId)).data.boundUid == request.auth.uid
+          )
+          && getAfter(quizClaimPath(classId, request.resource.data.eligibilityId)).data.uid == request.auth.uid;
+      }
+
+      // A transação claim + identity impede vincular uma mesma matrícula a dois UIDs.
+      match /quizClaims/{eligibilityId} {
+        allow get, list, update, delete: if isAdmin();
+        allow create: if googleUser()
+          && eligibilityId.matches('^[0-9a-f]{64}$')
+          && request.resource.data.keys().hasOnly(['uid', 'createdAt'])
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.createdAt == request.time
+          && get(eligiblePath(classId, eligibilityId)).data.status == 'active'
+          && (
+            !('boundUid' in get(eligiblePath(classId, eligibilityId)).data)
+            || get(eligiblePath(classId, eligibilityId)).data.boundUid == ''
+            || get(eligiblePath(classId, eligibilityId)).data.boundUid == request.auth.uid
+          )
+          && getAfter(quizIdentityPath(classId, request.auth.uid)).data.eligibilityId == eligibilityId;
+      }
+
+      match /quizSessions/{pin} {
+        allow get: if isAdmin() || quizMember(classId);
+        allow list: if isAdmin();
+        allow create, update, delete: if isAdmin();
+
+        match /participants/{uid} {
+          allow get: if isAdmin() || (googleUser() && uid == request.auth.uid);
+          allow list, update, delete: if isAdmin();
+          allow create: if quizMember(classId)
+            && uid == request.auth.uid
+            && get(quizSessionPath(classId, pin)).data.phase != 'ended'
+            && request.resource.data.keys().hasOnly(['uid', 'name', 'joinedAt'])
+            && request.resource.data.uid == request.auth.uid
+            && request.resource.data.name == quizName(classId)
+            && request.resource.data.joinedAt == request.time;
+        }
+
+        match /answers/{answerId} {
+          allow get: if isAdmin() || (
+            googleUser() && resource.data.uid == request.auth.uid
+          );
+          allow list, update, delete: if isAdmin();
+          allow create: if quizMember(classId)
+            && exists(quizParticipantPath(classId, pin, request.auth.uid))
+            && get(quizSessionPath(classId, pin)).data.phase == 'question'
+            && request.resource.data.keys().hasOnly(['uid', 'roundId', 'choice', 'submittedAt'])
+            && request.resource.data.uid == request.auth.uid
+            && request.resource.data.roundId == get(quizSessionPath(classId, pin)).data.roundId
+            && answerId == request.resource.data.roundId + '__' + request.auth.uid
+            && request.resource.data.choice is int
+            && request.resource.data.choice >= 0
+            && request.resource.data.choice <= 3
+            && request.resource.data.submittedAt == request.time
+            && (
+              get(quizSessionPath(classId, pin)).data.duration == 0
+              || request.time < get(quizSessionPath(classId, pin)).data.deadline
+            );
+        }
+
+        match /rounds/{roundId} {
+          allow read, write: if isAdmin();
+        }
+      }
+
   }
 }

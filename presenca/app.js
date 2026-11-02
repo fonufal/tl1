@@ -149,6 +149,8 @@ function matrix(){
       const first=state.windows.find(w=>w.day===day&&w.stage==="start");
       const last=state.windows.find(w=>w.day===day&&w.stage==="end");
       if(!first||!last)return "PENDENTE";
+      const finished=w=>w.status==="closed"||(w.expiresAt&&w.expiresAt.toMillis()<=Date.now());
+      if(!finished(first)||!finished(last))return "EM ANDAMENTO";
       return String((markStatus(s,first)?0:2)+(markStatus(s,last)?0:2));
     });
     const confirmed=cells.filter(x=>/^[024]$/.test(x)).reduce((t,x)=>t+Number(x),0);
@@ -162,6 +164,8 @@ function buildTable(){
   return '<div class="tablewrap"><table><thead><tr>'+hdr+'</tr></thead><tbody>'+m.slice(1).map(r=>'<tr>'+r.map((v,i)=>'<td '+(i>1?'class="num"':'')+'>'+esc(v)+'</td>').join("")+'</tr>').join("")+'</tbody></table></div>';
 }
 async function openWindow(stage){
+  if($("turma").value!==state.classId)throw Error("Clique em Consultar após trocar a turma.");
+  state.selectedDate=$("dia").value;
   if(!stageNames[stage]||!validDate(state.selectedDate))throw Error("Data/etapa inválida.");
   const already=state.windows.find(w=>w.id===windowId(state.selectedDate,stage));
   if(already&&!confirm("Reabrir esta etapa altera o QR e mantém os registros anteriores. Continuar?"))return;
@@ -171,8 +175,9 @@ async function openWindow(stage){
   notify("QR Code de "+(stage==="start"?"início":"final")+" criado.");
   await loadClass();
 }
-async function closeWindow(stage){if(!confirm("Encerrar a chamada "+stageNames[stage]+"?"))return;await updateDoc(winRef(state.selectedDate,stage),{status:"closed",closedAt:serverTimestamp(),closedBy:state.user.uid});await loadClass();}
+async function closeWindow(stage){state.selectedDate=$("dia").value;if($("turma").value!==state.classId)throw Error("Consulte primeiro a turma selecionada.");if(!confirm("Encerrar a chamada "+stageNames[stage]+"?"))return;await updateDoc(winRef(state.selectedDate,stage),{status:"closed",closedAt:serverTimestamp(),closedBy:state.user.uid});await loadClass();}
 async function correction(){
+  state.selectedDate=$("dia").value;if($("turma").value!==state.classId)throw Error("Consulte primeiro a turma selecionada.");
   const id=$("student").value,stage=$("stage").value,status=$("correction-status").value,reason=$("reason").value.trim();
   if(!state.roster.some(s=>s.id===id&&s.status==="active")||!stageNames[stage]||!["present","absent","auto"].includes(status)||reason.length<8)throw Error("Informe estudante, etapa, situação e justificativa de pelo menos oito caracteres.");
   const w=state.windows.find(x=>x.id===windowId(state.selectedDate,stage));
@@ -182,8 +187,9 @@ async function correction(){
   batch.set(doc(collection(winRef(state.selectedDate,stage),"correctionLogs")),{...fields,day:state.selectedDate,stage});
   await batch.commit();notify("Correção registrada e auditada.");await loadClass();
 }
-function downloadCSV(){const cells=matrix();const csv="\ufeff"+cells.map(r=>r.map(x=>'"'+String(x).replaceAll('"','""')+'"').join(";")).join("\r\n");const url=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));const a=document.createElement("a");a.href=url;a.download="presenca-"+state.classId+"-"+today()+".csv";a.click();URL.revokeObjectURL(url)}
-async function copyTSV(){await navigator.clipboard.writeText(matrix().map(r=>r.map(x=>String(x).replace(/[\t\r\n]/g," ")).join("\t")).join("\n"));notify("Grade copiada. Cole em uma planilha privada para conferência.")}
+function safeCell(x){const v=String(x);return /^[=+\-@]/.test(v)?"'"+v:v}
+function downloadCSV(){const cells=matrix();const csv="\ufeff"+cells.map(r=>r.map(x=>'"'+safeCell(x).replaceAll('"','""')+'"').join(";")).join("\r\n");const url=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));const a=document.createElement("a");a.href=url;a.download="presenca-"+state.classId+"-"+today()+".csv";a.click();setTimeout(()=>URL.revokeObjectURL(url),1500)}
+async function copyTSV(){await navigator.clipboard.writeText(matrix().map(r=>r.map(x=>safeCell(x).replace(/[\t\r\n]/g," ")).join("\t")).join("\n"));notify("Grade copiada. Cole em uma planilha privada para conferência.")}
 app.addEventListener("click",async e=>{
   const b=e.target.closest("[data-act]");if(!b)return;
   state.error="";

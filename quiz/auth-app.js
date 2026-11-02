@@ -13,7 +13,7 @@ const ABC="ABCD",CLASS_IDS=["tl1-2026-2-01","tl1-2026-2-02"];
 const p=new URLSearchParams(location.search);
 const state={user:null,admin:false,authReady:false,mode:"home",classId:p.get("turma")||"",
   pin:p.get("pin")||"",member:null,session:null,participants:[],answers:[],answer:null,
-  rounds:[],error:"",busy:false,unsubs:[],classes:[],authError:""};
+  rounds:[],error:"",busy:false,revealingRound:null,unsubs:[],classes:[],authError:""};
 const $=sel=>app.querySelector(sel);
 const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const tag=t=>'<span class="tag">'+esc(t)+'</span>';
@@ -32,7 +32,7 @@ const validate=q=>q&&typeof q.id==="string"&&typeof q.q==="string"&&Array.isArra
 function allQuestions(){let custom=[];try{const data=JSON.parse(localStorage.getItem("tl1-quiz-custom-v1")||"[]");if(Array.isArray(data))custom=data.filter(validate)}catch(_){}return Q.concat(custom)}
 function notify(msg){toast.textContent=msg;toast.classList.add("show");setTimeout(()=>toast.classList.remove("show"),5000)}
 function message(err){state.error=err?.message||String(err);notify(state.error);render()}
-function clean(){state.unsubs.forEach(un=>un());state.unsubs=[];state.session=null;state.participants=[];state.answers=[];state.answer=null;state.rounds=[]}
+function clean(){state.unsubs.forEach(un=>un());state.unsubs=[];state.session=null;state.participants=[];state.answers=[];state.answer=null;state.rounds=[];state.revealingRound=null}
 function setUrl(extra={}){const url=new URL(location.href);url.search="";if(state.classId)url.searchParams.set("turma",state.classId);if(state.pin)url.searchParams.set("pin",state.pin);if(extra.admin)url.searchParams.set("professor","1");history.replaceState(null,"",url)}
 function section(title,description){return '<div class="room-head"><div><p class="eyebrow">EM QUESTÃO · TL1</p><h1>'+title+'</h1><p class="smallnote">'+description+'</p></div><div class="btnline">'+act("home","Início","btn quiet small")+'</div></div>'}
 function errorMsg(){return state.error?'<div class="explanation" role="alert"><strong>Não foi possível continuar</strong>'+esc(state.error)+'</div>':""}
@@ -114,7 +114,7 @@ function renderStudent(){
  let body="";
  if(s.phase==="lobby")body='<div class="guest-card panel center"><div class="big-symbol">✓</div><h2>Você entrou na sala.</h2><p class="lead">Aguarde o professor iniciar.</p></div>';
  if(s.phase==="question"){
-  body='<div class="guest-card"><p class="question-number">QUESTÃO '+(s.currentIndex+1)+' / '+s.questionIds.length+'</p><h2 class="prompt">'+esc(s.currentQuestion?.q||"")+'</h2><div class="meta">'+tag("Tempo: " +(s.duration? "até o encerramento":"Livre"))+tag(state.answer?"Resposta registrada":"Selecione uma alternativa")+'</div>'+
+  body='<div class="guest-card"><p class="question-number">QUESTÃO '+(s.currentIndex+1)+' / '+s.questionIds.length+'</p><h2 class="prompt">'+esc(s.currentQuestion?.q||"")+'</h2><div class="meta">'+tag("Tempo restante")+(s.duration?'<span class="tag" id="clock">…</span>':tag("Sem limite"))+tag(state.answer?"Resposta registrada":"Selecione uma alternativa")+'</div>'+
   '<div class="answers">'+(s.currentQuestion?.a||[]).map((a,i)=>'<button type="button" class="answer" data-choice="'+i+'" aria-pressed="'+(state.answer?.choice===i)+'" '+(state.answer||state.busy?"disabled":"")+'><span class="letter">'+ABC[i]+'</span><span>'+esc(a)+'</span></button>').join("")+'</div>'+
   (state.answer?'<div class="explanation">Sua resposta foi registrada. Aguarde o encerramento.</div>':'<p class="smallnote">A resposta é única e o prazo é validado pelo servidor.</p>')+'</div>';
  }
@@ -126,6 +126,7 @@ function renderStudent(){
 }
 async function answer(choice){
  if(state.busy||state.answer||!state.session||state.session.phase!=="question"||!Number.isInteger(choice)||choice<0||choice>3)return;
+ if(state.session.duration&&state.session.deadline?.toMillis&&Date.now()>=state.session.deadline.toMillis()){notify("O tempo de resposta terminou.");return;}
  state.busy=true;
  try{
    const roundId=state.session.roundId,ar=doc(answersRef(),roundId+"__"+state.user.uid);
@@ -157,7 +158,7 @@ function renderTeacher(){
  '<aside class="panel"><h2>'+r.correctCount+' de '+r.answered+'</h2><p>respostas corretas</p>'+(s.ranking&&s.score?leadersHtml(s.leaders||[]):"")+
  '<div class="stack" style="margin-top:20px">'+act("next",s.currentIndex+1<s.questionIds.length?"Próxima questão":"Concluir","btn primary full")+act("end","Encerrar sessão","btn quiet full")+'</div></aside></div>';
  }
- if(s.phase==="ended")body='<div class="stage-grid"><section><div class="big-symbol">✓</div><h2 class="prompt">Sessão encerrada.</h2><p class="lead">'+s.questionIds.length+' questões previstas, '+state.rounds.length+' realizadas.</p><div class="btnline">'+act("export","Exportar resultados privados","btn primary")+act("new","Nova sessão","btn light")+'</div></section><aside class="panel"><h3>Classificação</h3>'+leadersHtml(s.leaders||[])+'</aside></div>';
+ if(s.phase==="ended")body='<div class="stage-grid"><section><div class="big-symbol">✓</div><h2 class="prompt">Sessão encerrada.</h2><p class="lead">'+s.questionIds.length+' questões previstas, '+state.rounds.length+' realizadas.</p><div class="btnline">'+act("export","Exportar relatório agregado","btn primary")+act("export-individual","Exportar respostas individuais (privado)","btn light")+act("new","Nova sessão","btn quiet")+'</div></section><aside class="panel"><h3>Classificação</h3>'+leadersHtml(s.leaders||[])+'</aside></div>';
  app.innerHTML=section("Sala do professor",esc(clabel(state.classId)))+
  '<div class="meta">'+tag("Sessão "+state.pin)+tag(s.phase)+tag(count+" participantes")+tag(s.score?"Com pontuação":"Sem pontuação")+'</div>'+body+errorMsg();
  if(s.phase==="lobby"){const el=$("#qr");if(el&&window.QRCode){new window.QRCode(el,{text:studentLink(),width:160,height:160,colorDark:"#141517",colorLight:"#fff"})}}
@@ -226,8 +227,8 @@ function scoreBoard(rounds,answers){
  .map(a=>({label:"J-"+a.uid.slice(0,5),points:a.points,correct:a.correct}));
 }
 async function reveal(){
- const s=state.session;if(!s||s.phase!=="question")return;
- state.busy=true;
+ const s=state.session;if(!s||s.phase!=="question"||state.revealingRound===s.roundId)return;
+ state.revealingRound=s.roundId;state.busy=true;
  try{
    const q=qById(s.questionIds[s.currentIndex]);if(!q)throw Error("Questão ausente do banco local.");
    const answers=(await getDocs(answersRef())).docs.map(d=>d.data());
@@ -243,7 +244,19 @@ async function reveal(){
    batch.update(sessionRef(),{phase:"result",reveal:{correct:q.correct,why:q.why,counts,answered:now.length,correctCount},
      leaders,updatedAt:serverTimestamp()});
    await batch.commit();
- }catch(e){message(e)}finally{state.busy=false}
+ }catch(e){message(e)}finally{state.busy=false;state.revealingRound=null}
+}
+async function exportIndividual(){
+ const s=state.session;if(!s||!state.admin)return;
+ const names=new Map(state.participants.map(x=>[x.uid,x.name]));
+ const roundMap=new Map(state.rounds.map(r=>[r.roundId,r]));
+ const rows=[["turma","codigo_sessao","uid","nome","indice_questao","questao_id","alternativa","acertou","enviado_em"]];
+ for(const a of state.answers){const r=roundMap.get(a.roundId);if(!r)continue;
+   rows.push([state.classId,state.pin,a.uid,names.get(a.uid)||"",r.index+1,r.questionId,ABC[a.choice],a.choice===r.correct?"sim":"não",a.submittedAt?.toDate?.().toISOString()||""]);
+ }
+ const csv=rows.map(row=>row.map(v=>'"'+String(v??"").replaceAll('"','""')+'"').join(",")).join("\r\n");
+ const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"}),url=URL.createObjectURL(blob),anchor=document.createElement("a");
+ anchor.href=url;anchor.download="quiz-privado-"+state.classId+"-"+state.pin+".csv";anchor.click();URL.revokeObjectURL(url);
 }
 function tick(){
  const timer=$("#clock"),s=state.session;
@@ -290,6 +303,7 @@ app.addEventListener("click",async ev=>{
  if(id==="new"&&state.admin){clean();state.pin="";state.mode="teacher";render();}
  if(id==="copy-link"&&state.admin){try{await navigator.clipboard.writeText(studentLink());notify("Link copiado.")}catch(e){notify("Não foi possível copiar o link.")}}
  if(id==="export"&&state.admin)exportResults();
+ if(id==="export-individual"&&state.admin)exportIndividual();
 });
 onAuthStateChanged(auth,async user=>{
  clean();state.user=user;state.admin=false;state.member=null;state.authReady=true;state.error="";

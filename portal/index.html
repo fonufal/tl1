@@ -3,109 +3,57 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Portal de Teoria Linguística 1 da FALE/UFAL: estudo, apresentações, materiais e orientações da disciplina.">
+  <meta name="description" content="Portal experimental de Teoria Linguística 1 da FALE/UFAL. Materiais, estudo, apresentações e recursos da disciplina.">
   <meta name="theme-color" content="#f4f0e8">
-  <title>Portal TL1 | Teoria Linguística 1 · FALE/UFAL</title>
+  <title>Portal TL1 · Índice editorial · Estudo de design</title>
   <link rel="stylesheet" href="./styles.css">
 </head>
-<body>
+<body class="concept-a">
   <a class="skip" href="#principal">Pular para o conteúdo</a>
-  <header class="site-header" id="topo">
-    <div class="header-inner">
-      <a class="identity" href="#inicio" aria-label="Portal TL1 — início">
-        <span class="identity-mark" aria-hidden="true">TL<span class="identity-sup">1</span></span>
-        <span class="identity-caption"><strong>Teoria Linguística 1</strong><small>Portal da disciplina · FALE/UFAL</small></span>
-      </a>
-      <nav aria-label="Navegação principal" class="main-nav">
-        <a href="#ferramentas">Ferramentas</a>
-        <a href="#estudar">Estudar</a>
-        <a href="#apoio">Informações</a>
-      </nav>
-    </div>
+  <div class="concept-strip" aria-label="Alternativas de design">
+    <span>PORTAL TL1 <span aria-hidden="true">/</span> ESTUDO VISUAL</span>
+    <nav aria-label="Comparar direções visuais">
+      <a href="./index.html" aria-current="page">01 Índice</a>
+      <a href="./alternativas/caderno.html">02 Caderno</a>
+      <a href="./alternativas/percurso.html">03 Percurso</a>
+    </nav>
+  </div>
+  <header class="site-header">
+    <a class="identity" href="#inicio" aria-label="TL1, início"><span class="identity-mark">TL<span class="sup">1</span></span><span class="identity-caption">Teoria Linguística 1<br>FALE · UFAL</span></a>
+    <nav aria-label="Navegação principal" class="main-nav">
+      <a href="#estudar">Estudar</a>
+      <a href="#ferramentas">Ferramentas</a>
+      <a href="#apoio">Apoio</a>
+    </nav>
   </header>
-
   <main id="principal">
-    <section class="hero wrap" id="inicio" aria-labelledby="page-title">
+    <section class="hero wrap" id="inicio" aria-labelledby="title">
       <div class="hero-major">
-        <p class="kicker">TEORIA LINGUÍSTICA 1 <span aria-hidden="true">/</span> LETP239</p>
-        <h1 id="page-title">A linguagem<br><em>em questão.</em></h1>
-        <div class="hero-intro">
-          <p>Materiais, estudo e atividades da disciplina em um só lugar. Escolha por onde começar.</p>
-          <a class="text-link" href="#ferramentas">Ver as ferramentas <span aria-hidden="true">↘</span></a>
-        </div>
+        <p class="kicker">TEORIA LINGUÍSTICA 1 <span>—</span> LETP239</p>
+        <h1 id="title">A linguagem<br><em>em questão.</em></h1>
+        <div class="hero-intro"><p>Um lugar para encontrar materiais, explorar ideias e participar das atividades da disciplina.</p><a class="text-link" href="#ferramentas">Explorar as ferramentas <span aria-hidden="true">↗</span></a></div>
       </div>
-      <aside class="hero-aside" aria-label="Acessos diretos">
-        <p class="aside-heading">ACESSE AGORA <span>02 DISPONÍVEIS</span></p>
-        <a href="https://fonufal.github.io/tl1/" class="shortcut"><span>Teoria em<br>Voz Alta</span><span aria-hidden="true">↗</span></a>
-        <a href="https://fonufal.github.io/tl1/apresentacoes/" class="shortcut"><span>Apresentações</span><span aria-hidden="true">↗</span></a>
-        <p class="aside-foot">Outras duas estão previstas.</p>
-      </aside>
-    </section>
-
-    <section id="ferramentas" class="tools-section" aria-labelledby="tools-title">
-      <div class="wrap">
-        <div class="section-index"><span>01 / FERRAMENTAS</span><span class="section-rule"></span><span>ESTUDAR · APRESENTAR · PARTICIPAR</span></div>
-        <header class="tools-header">
-          <h2 id="tools-title">Entre por<br><em>aqui.</em></h2>
-          <p>As ferramentas funcionam de forma independente. Duas já podem ser utilizadas; as outras estão previstas.</p>
-        </header>
-        <div class="tool-list">
-          <a class="tool tool-active" href="https://fonufal.github.io/tl1/">
-            <span class="tool-n">01</span>
-            <span class="tool-main"><strong>Teoria em Voz Alta</strong><small>Leia, explique conceitos e avalie sua compreensão.</small></span>
-            <span class="tool-status">Disponível</span><span class="tool-arrow" aria-hidden="true">↗</span>
-          </a>
-          <a class="tool tool-active" href="https://fonufal.github.io/tl1/apresentacoes/">
-            <span class="tool-n">02</span>
-            <span class="tool-main"><strong>Apresentações</strong><small>Escolha de tópicos, cronômetro e avaliação por pares.</small></span>
-            <span class="tool-status">Disponível</span><span class="tool-arrow" aria-hidden="true">↗</span>
-          </a>
-          <div class="tool tool-future">
-            <span class="tool-n">03</span>
-            <span class="tool-main"><strong>Quiz interativo</strong><small>Perguntas e respostas durante as aulas.</small></span>
-            <span class="tool-status">Planejado</span><span class="tool-arrow" aria-hidden="true">—</span>
-          </div>
-          <div class="tool tool-future">
-            <span class="tool-n">04</span>
-            <span class="tool-main"><strong>Chamada por QR Code</strong><small>Registro dos dois primeiros e dos dois últimos tempos de aula.</small></span>
-            <span class="tool-status">Planejado</span><span class="tool-arrow" aria-hidden="true">—</span>
-          </div>
-        </div>
-      </div>
+      <aside class="hero-aside" aria-label="Percursos do portal"><span class="aside-number">01<span>/</span>04</span><p>Estudar<br>Praticar<br>Participar<br>Acompanhar</p><span class="tiny-annotation">Quatro maneiras de entrar em TL1</span></aside>
     </section>
 
     <section id="estudar" class="study-section wrap" aria-labelledby="study-title">
-      <div class="section-index"><span>02 / ESTUDAR</span><span class="section-rule"></span><span>MATERIAIS DA DISCIPLINA</span></div>
-      <div class="study-layout">
-        <div><h2 id="study-title">Aulas,<br>leituras,<br><em>ideias.</em></h2><p class="study-subtitle">Uma área de referência para acompanhar os conteúdos da disciplina.</p></div>
-        <div class="study-items" aria-label="Áreas de estudo em preparação">
-          <div class="study-item"><span>01</span><div><h3>Materiais de aula</h3><p>Slides, exemplos e roteiros de cada unidade.</p></div></div>
-          <div class="study-item"><span>02</span><div><h3>Leituras</h3><p>Textos obrigatórios e indicações complementares.</p></div></div>
-          <div class="study-item"><span>03</span><div><h3>Avaliações</h3><p>Instruções e critérios das atividades.</p></div></div>
-          <p class="study-note">Essas áreas estão sendo organizadas. As entregas e notas permanecem no SIGAA.</p>
-        </div>
-      </div>
+      <div class="section-index"><span>01 / ESTUDAR</span><span class="line"></span><span>UMA DISCIPLINA EM PERCURSO</span></div>
+      <div class="study-layout"><h2 id="study-title">Comece<br>pelas ideias.</h2><div class="study-copy"><p>As aulas, as leituras e as atividades se articulam em torno de perguntas sobre a linguagem, suas estruturas, seus usos e suas explicações.</p><p>Os materiais de aula e o roteiro da unidade em andamento serão reunidos aqui, sem substituir os avisos e registros do SIGAA.</p><span class="small-note">ÁREA EM ESTRUTURAÇÃO</span></div></div>
     </section>
 
-    <section id="apoio" class="support-section" aria-labelledby="support-title">
-      <div class="wrap">
-        <div class="section-index"><span>03 / INFORMAÇÕES</span><span class="section-rule"></span><span>ORIENTAÇÃO E APOIO</span></div>
-        <div class="support-layout">
-          <h2 id="support-title">Dentro e fora<br>da sala.</h2>
-          <div class="support-items">
-            <div><span class="mini-number">A</span><div><h3>SIGAA</h3><p>Comunicados oficiais, frequência, entregas e notas continuam no sistema institucional.</p></div></div>
-            <div><span class="mini-number">B</span><div><h3>Atendimento e monitoria</h3><p>Horários e orientações de apoio coletivo serão reunidos nesta área.</p></div></div>
-            <div><span class="mini-number">C</span><div><h3>Acessibilidade</h3><p>O portal prevê navegação por teclado, leitura em celular e alternativas às atividades digitais.</p></div></div>
-          </div>
-        </div>
+    <section id="ferramentas" class="tools-section" aria-labelledby="tools-title"><div class="wrap">
+      <div class="section-index"><span>02 / FERRAMENTAS</span><span class="line"></span><span>ABRIR · PRATICAR · PARTICIPAR</span></div>
+      <div class="tools-header"><h2 id="tools-title">Quatro formas<br>de participar.</h2><p>Do estudo individual às atividades em sala. Duas ferramentas já estão disponíveis; outras duas estão sendo planejadas.</p></div>
+      <div class="tool-list">
+        <a class="tool tool-active" href="https://fonufal.github.io/tl1/" aria-label="Abrir Teoria em Voz Alta, ferramenta disponível"><span class="tool-n">01</span><span class="tool-main"><strong>Teoria em Voz Alta</strong><small>Leia, explique conceitos e avalie sua compreensão.</small></span><span class="tool-status">Disponível</span><span class="tool-arrow" aria-hidden="true">↗</span></a>
+        <a class="tool tool-active" href="https://fonufal.github.io/tl1/apresentacoes/" aria-label="Abrir Apresentações, ferramenta disponível"><span class="tool-n">02</span><span class="tool-main"><strong>Apresentações</strong><small>Escolha de tópicos, cronômetro e avaliação por pares.</small></span><span class="tool-status">Disponível</span><span class="tool-arrow" aria-hidden="true">↗</span></a>
+        <div class="tool tool-future"><span class="tool-n">03</span><span class="tool-main"><strong>Quiz interativo</strong><small>Perguntas e respostas durante as aulas.</small></span><span class="tool-status">Em planejamento</span><span class="tool-arrow" aria-hidden="true">—</span></div>
+        <div class="tool tool-future"><span class="tool-n">04</span><span class="tool-main"><strong>Chamada por QR Code</strong><small>Registros de presença no começo e no fim do encontro.</small></span><span class="tool-status">Em planejamento</span><span class="tool-arrow" aria-hidden="true">—</span></div>
       </div>
-    </section>
+    </div></section>
+
+    <section id="apoio" class="support-section wrap" aria-labelledby="support-title"><div class="section-index"><span>03 / ORIENTAÇÕES</span><span class="line"></span><span>ACOMPANHAR O CURSO</span></div><div class="support-layout"><h2 id="support-title">O curso, dentro<br>e fora da sala.</h2><div class="support-items"><div><span class="mini-number">A</span><h3>Avisos e avaliações</h3><p>O SIGAA continua sendo a referência institucional para comunicados, entregas, notas e frequência.</p></div><div><span class="mini-number">B</span><h3>Atendimento e monitoria</h3><p>Orientações e formas de contato da disciplina ficarão reunidas nesta área.</p></div><div><span class="mini-number">C</span><h3>Acessibilidade</h3><p>O portal será desenvolvido para uso por teclado, leitores de tela e celulares.</p></div></div></div></section>
   </main>
-
-  <footer class="footer wrap">
-    <span><strong>TL1</strong> · Teoria Linguística 1</span>
-    <span>Faculdade de Letras · Universidade Federal de Alagoas</span>
-    <a href="#topo">Voltar ao início ↑</a>
-  </footer>
+  <footer class="footer wrap"><span><strong>TL1</strong> · Teoria Linguística 1</span><span>FALE / Universidade Federal de Alagoas</span><span>Estudo de design · direção 01</span></footer>
 </body>
 </html>
